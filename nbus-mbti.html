@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NB-BUS-MBTI 车型人格测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .mbti-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .mbti-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .mbti-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .mbti-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .question-container {
+            padding: 30px;
+        }
+        .question-number {
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f3ff;
+            transform: translateX(5px);
+        }
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .option-letter {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .option.selected .option-letter {
+            background: white;
+            color: #667eea;
+        }
+        .option-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            padding: 20px 30px 30px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .prev-btn {
+            background: #e9ecef;
+            color: #666;
+        }
+        .prev-btn:hover {
+            background: #dee2e6;
+        }
+        .next-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-container {
+            display: none;
+            text-align: center;
+            padding: 40px 30px;
+        }
+        .result-container.show {
+            display: block;
+        }
+        .result-badge {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+        }
+        .result-badge.G { background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); }
+        .result-badge.A { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .result-badge.B { background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); }
+        .result-badge.C { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); }
+        .result-badge.D { background: linear-gradient(135deg, #2196F3 0%, #03A9F4 100%); }
+        .result-badge.E { background: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%); }
+        .result-badge.F { background: linear-gradient(135deg, #607D8B 0%, #455A64 100%); }
+        
+        .result-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .result-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .result-description {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            line-height: 1.8;
+            color: #444;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+        .restart-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            background: #f0f3ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .mbti-header { padding: 20px; }
+            .mbti-header h1 { font-size: 22px; }
+            .question-container { padding: 20px; }
+            .question-text { font-size: 16px; }
+            .option { padding: 12px 15px; }
+            .option-text { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mbti-container">
+        <div class="mbti-header">
+            <h1>🚌 NB-BUS-MBTI</h1>
+            <p>车型人格测试 - 探索你的公交之魂</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">
+                <span id="currentQuestion">1</span> / <span id="totalQuestions">25</span>
+            </div>
+        </div>
+        
+        <div class="question-container" id="questionContainer">
+            <div class="question-number" id="questionNumber">第 1 题</div>
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="nav-btn prev-btn" id="prevBtn" onclick="prevQuestion()">上一题</button>
+            <button class="nav-btn next-btn" id="nextBtn" onclick="nextQuestion()" disabled>下一题</button>
+        </div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-badge" id="resultBadge">A</div>
+            <h2 class="result-title" id="resultTitle">测试结果</h2>
+            <p class="result-subtitle" id="resultSubtitle">你的车型人格是...</p>
+            <div class="stats-container" id="statsContainer"></div>
+            <div class="result-description" id="resultDescription"></div>
+            <button class="restart-btn" onclick="restartTest()">重新测试</button>
+        </div>
+    </div>
+    
+    <script>
+    const questions = [
+        {
+            question: "别人对你的整体长期评价大多是？",
+            options: [
+                { letter: "A", text: "天赋出众，难得的优秀人才" },
+                { letter: "B", text: "稳重靠谱，团队必不可少的主力" },
+                { letter: "C", text: "老实肯干，但做事条理很差" },
+                { letter: "D", text: "踏实随和，很好磨合，就是不够细腻" },
+                { letter: "E", text: "人不坏，但平时行事动静太大容易吵到别人" },
+                { letter: "F", text: "深度相处容易不舒服，遇事喜欢推脱责任" },
+                { letter: "G", text: "习惯统筹全局，决定身边人和事的走向" }
+            ]
+        },
+        {
+            question: "面对大好机遇，你的常态是？",
+            options: [
+                { letter: "A", text: "自身实力足够，却总被外界因素耽误时机" },
+                { letter: "B", text: "稳稳抓住机会，稳步完成任务" },
+                { letter: "C", text: "努力干活，但规划安排总是乱七八糟" },
+                { letter: "D", text: "安稳守住分内小事，不争抢大机会" },
+                { letter: "E", text: "一行动就风风火火，动静拉满" },
+                { letter: "F", text: "扛不住压力，很容易中途掉链子" },
+                { letter: "G", text: "负责制定规则，决定机遇分给谁" }
+            ]
+        },
+        {
+            question: "和亲密好友近距离长期相处，对方感受是？",
+            options: [
+                { letter: "A", text: "相处舒适体面，长久都很欣赏你" },
+                { letter: "B", text: "相处安心，偶尔小瑕疵完全不在意" },
+                { letter: "C", text: "深入相处容易觉得别扭，遇事容易让对方难受" },
+                { letter: "D", text: "很好相处，只是不够体贴温柔" },
+                { letter: "E", text: "总被你的大嗓门、急躁的性子打扰" },
+                { letter: "F", text: "相处疲惫，矛盾不断，很难磨合" },
+                { letter: "G", text: "俯瞰全局，把控所有人的相处格局" }
+            ]
+        },
+        {
+            question: "自身短板出现问题时，你的处理方式是？",
+            options: [
+                { letter: "A", text: "问题大多来自外部环境，自身没有核心问题" },
+                { letter: "B", text: "主动解决问题，小失误坦然接受" },
+                { letter: "C", text: "问题日积月累，很难主动优化改变" },
+                { letter: "D", text: "问题能将就就将就，务实凑合过日子" },
+                { letter: "E", text: "很难察觉自身的缺点，习惯原样行事" },
+                { letter: "F", text: "习惯把问题归咎外界，不愿主动负责整改" },
+                { letter: "G", text: "制定奖惩规则，评判所有人的问题对错" }
+            ]
+        },
+        {
+            question: "在集体团队里你的定位是？",
+            options: [
+                { letter: "A", text: "稀缺的顶尖核心，无可替代" },
+                { letter: "B", text: "中坚骨干，扛住大部分主力工作" },
+                { letter: "C", text: "默默干活的老员工，思路老旧跟不上新方式" },
+                { letter: "D", text: "基层实干人员，擅长琐碎日常工作" },
+                { letter: "E", text: "安分完成工作，但存在感吵闹显眼" },
+                { letter: "F", text: "能力有限，很难承担重要工作" },
+                { letter: "G", text: "顶层管理者，调配团队所有人分工" }
+            ]
+        },
+        {
+            question: "你的抗压能力如何？",
+            options: [
+                { letter: "A", text: "上限极高，能承受超大负荷，败于外部大势" },
+                { letter: "B", text: "抗压稳定，高强度工作依旧平稳发挥" },
+                { letter: "C", text: "承压后容易状态失衡，行事越发混乱" },
+                { letter: "D", text: "吃苦耐劳，不怕辛苦，上限不高" },
+                { letter: "E", text: "压力下性子更急躁，动静变得更大" },
+                { letter: "F", text: "压力稍大就容易崩盘，状态急速下滑" },
+                { letter: "G", text: "把控整体压力分配，规划整体运营节奏" }
+            ]
+        },
+        {
+            question: "做事行事风格属于？",
+            options: [
+                { letter: "A", text: "眼界格局大，思虑长远，格局开阔" },
+                { letter: "B", text: "中庸均衡，面面俱到，稳妥不出错" },
+                { letter: "C", text: "思维固化老旧，不懂变通，规划混乱" },
+                { letter: "D", text: "务实接地气，行事简单直白，不讲究精致" },
+                { letter: "E", text: "外放急躁，行动张扬，动静十分明显" },
+                { letter: "F", text: "先天底子不足，行事处处受限" },
+                { letter: "G", text: "理性权衡利弊，一切以整体大局利益为先" }
+            ]
+        },
+        {
+            question: "你的优缺点占比？",
+            options: [
+                { letter: "A", text: "优点极为亮眼，缺憾全部来自外部客观因素" },
+                { letter: "B", text: "优点均衡全面，仅有少量无伤大雅的小毛病" },
+                { letter: "C", text: "勤恳是唯一优点，规划、硬件短板很明显" },
+                { letter: "D", text: "优点是随和耐用，缺点是不够细腻贴心" },
+                { letter: "E", text: "本性本分是优点，吵闹是改不掉的硬伤" },
+                { letter: "F", text: "优点极少，先天硬性短板非常多" },
+                { letter: "G", text: "优势是全盘掌控，需要平衡各方利弊取舍" }
+            ]
+        },
+        {
+            question: "长久之后，身边人对你的回忆是？",
+            options: [
+                { letter: "A", text: "自带情怀滤镜，即便退场依旧被大家怀念" },
+                { letter: "B", text: "一直稳定可靠，是长久靠谱的老朋友" },
+                { letter: "C", text: "勤恳大家都看得到，但短板让人印象深刻" },
+                { letter: "D", text: "朴实普通，日常不起眼，但随时都能帮忙" },
+                { letter: "E", text: "印象就是热闹吵闹，为人本分不难处" },
+                { letter: "F", text: "长久相处下来，大家都会觉得体验很差" },
+                { letter: "G", text: "所有人的发展走向，都离不开你的决策" }
+            ]
+        },
+        {
+            question: "先天的自身底子天赋是？",
+            options: [
+                { letter: "A", text: "出厂配置顶配，硬件底子十分优秀" },
+                { letter: "B", text: "原厂配置标准主力款，综合配置均衡" },
+                { letter: "C", text: "早期老旧初代配置，用料一般易老化损耗" },
+                { letter: "D", text: "本土基础实用配置，主打适配本地环境" },
+                { letter: "E", text: "三电硬件配置一般，天生运行噪音偏大" },
+                { letter: "F", text: "早期试水低配配置，核心硬件质量很差" },
+                { letter: "G", text: "手握采购选择权，决定所有人的初始配置" }
+            ]
+        },
+        {
+            question: "遭遇外界大环境变故，你会？",
+            options: [
+                { letter: "A", text: "本身实力完好，被迫受大势影响走向落幕" },
+                { letter: "B", text: "可以适应环境变化，稳定正常运转" },
+                { letter: "C", text: "环境变差后，本身老化问题加速暴露" },
+                { letter: "D", text: "适应力极强，再普通的环境都能正常生存" },
+                { letter: "E", text: "环境变化只会放大自身吵闹的特点" },
+                { letter: "F", text: "恶劣环境下，各类毛病会集中爆发" },
+                { letter: "G", text: "根据市场大势，及时调整整体运营策略" }
+            ]
+        },
+        {
+            question: "别人想要对你进行磨合、改变你的缺点，结果是？",
+            options: [
+                { letter: "A", text: "不需要改动底子，只需要改善外部环境即可" },
+                { letter: "B", text: "小缺点可以轻松磨合完善" },
+                { letter: "C", text: "底层设计问题，很难从根本改动优化" },
+                { letter: "D", text: "容易磨合相处，但很难变得精致优秀" },
+                { letter: "E", text: "先天硬件问题，很难改掉吵闹的特质" },
+                { letter: "F", text: "主观不愿配合改变，磨合只会矛盾加剧" },
+                { letter: "G", text: "由你制定标准，要求他人做出改变适配规则" }
+            ]
+        },
+        {
+            question: "日常发挥的稳定性？",
+            options: [
+                { letter: "A", text: "巅峰状态极强，闲置蛰伏期状态偏弱" },
+                { letter: "B", text: "全程发挥稳定，上下浮动很小" },
+                { letter: "C", text: "前期尚可，使用越久状态下滑越明显" },
+                { letter: "D", text: "常年稳定出勤，性能始终平平无奇" },
+                { letter: "E", text: "工作全程稳定，唯独启动阶段动静巨大" },
+                { letter: "F", text: "状态时好时坏，关键时刻容易掉链子" },
+                { letter: "G", text: "全程掌控整体稳定，调度平衡所有成员状态" }
+            ]
+        },
+        {
+            question: "待人包容度如何？",
+            options: [
+                { letter: "A", text: "包容力极强，可以接纳各类人与事" },
+                { letter: "B", text: "包容性适中，待人宽厚，兼顾所有人" },
+                { letter: "C", text: "包容度一般，思维守旧，很难接纳新想法" },
+                { letter: "D", text: "包容性拉满，来者不拒，适配各类人群" },
+                { letter: "E", text: "可以包容他人，但自身容易打扰到旁人" },
+                { letter: "F", text: "包容性弱，相处容易产生摩擦矛盾" },
+                { letter: "G", text: "统筹规划人员分配，合理安排人员适配岗位" }
+            ]
+        },
+        {
+            question: "外形与外在气质观感是？",
+            options: [
+                { letter: "A", text: "造型独特稀有，外观质感高级少见" },
+                { letter: "B", text: "大气规整的主流款式，耐看稳重" },
+                { letter: "C", text: "造型设计比较抽象，布局观感别扭" },
+                { letter: "D", text: "小巧接地气，本土随处可见，十分大众化" },
+                { letter: "E", text: "外观平平无奇，一开起来瞬间存在感拉满" },
+                { letter: "F", text: "外观老旧普通，整体观感较差" },
+                { letter: "G", text: "身居幕后，不以外在形象作为评判标准" }
+            ]
+        },
+        {
+            question: "别人遇到麻烦需要兜底帮忙，你会？",
+            options: [
+                { letter: "A", text: "可以承接超大难题，是顶级的兜底人选" },
+                { letter: "B", text: "首选靠谱兜底者，大部分难题都能解决" },
+                { letter: "C", text: "愿意帮忙，但思路混乱容易越帮越乱" },
+                { letter: "D", text: "小事随叫随到，分内琐事兜底完全没问题" },
+                { letter: "E", text: "愿意出手帮忙，但是过程吵吵闹闹" },
+                { letter: "F", text: "很难接住难题，容易帮不上忙还推卸问题" },
+                { letter: "G", text: "分配合适的人进行兜底，把控问题解决方案" }
+            ]
+        },
+        {
+            question: "你的上限发展潜力是？",
+            options: [
+                { letter: "A", text: "上限天花板，潜力极高，只是容易被外界限制" },
+                { letter: "B", text: "上限中等偏上，安稳发展就能稳步变强" },
+                { letter: "C", text: "上限早早定型，老旧底子没有提升空间" },
+                { letter: "D", text: "上限固定，只能做好基层琐事，难成大事" },
+                { letter: "E", text: "潜力普通，本分做事即可，很难拔高上限" },
+                { letter: "F", text: "先天上限极低，很难拥有更好的发展" },
+                { letter: "G", text: "上限没有边界，手握规则就能决定整体上限" }
+            ]
+        },
+        {
+            question: "长期时间流逝，自身损耗老化速度是？",
+            options: [
+                { letter: "A", text: "本体耐用度优秀，老化速度很慢" },
+                { letter: "B", text: "老化平缓，日常损耗在合理范围内" },
+                { letter: "C", text: "金属、内在结构容易锈蚀老化，损耗明显" },
+                { letter: "D", text: "皮实耐造，老化速度慢，维修成本很低" },
+                { letter: "E", text: "整体耐用合格，唯独运行噪音会越来越明显" },
+                { letter: "F", text: "核心部件老化速度飞快，损耗问题频发" },
+                { letter: "G", text: "制定维保制度，规定所有人的维修与淘汰规则" }
+            ]
+        },
+        {
+            question: "处事细腻程度，能否顾及他人感受？",
+            options: [
+                { letter: "A", text: "心思周全，待人处事体面，充分照顾他人" },
+                { letter: "B", text: "大体周全，细节偶尔考虑不周，无伤大雅" },
+                { letter: "C", text: "粗线条，规划随心所欲，时常忽略旁人感受" },
+                { letter: "D", text: "为人实在，但共情力弱，不够细心体贴" },
+                { letter: "E", text: "很难顾及他人，行动吵闹容易忽略旁人感受" },
+                { letter: "F", text: "很少考虑他人感受，相处容易让人不舒服" },
+                { letter: "G", text: "站在整体角度考量，优先集体而非单人感受" }
+            ]
+        },
+        {
+            question: "出身环境与适配圈子是？",
+            options: [
+                { letter: "A", text: "外来高端技术底子，小众高端圈层受欢迎" },
+                { letter: "B", text: "本土主流通用出身，适配绝大多数主流圈子" },
+                { letter: "C", text: "早期初代本土产物，适配老旧旧环境" },
+                { letter: "D", text: "纯本土本土出身，完美适配本地日常环境" },
+                { letter: "E", text: "本土支线常规出身，适合小圈子日常环境" },
+                { letter: "F", text: "早年试水产物，只适配偏远小众低端环境" },
+                { letter: "G", text: "顶层统筹身份，适配所有圈层与环境" }
+            ]
+        },
+        {
+            question: "突如其来的突发状况来临，你的反应是？",
+            options: [
+                { letter: "A", text: "本身足以应对，问题根源在于前期筹备搁置" },
+                { letter: "B", text: "冷静从容应对，平稳化解突发问题" },
+                { letter: "C", text: "遇事反应激烈，容易慌乱，处理逻辑混乱" },
+                { letter: "D", text: "遇事踏实应对，只求平稳解决不出错" },
+                { letter: "E", text: "遇到急事会格外急躁，动静变得更大" },
+                { letter: "F", text: "突发状况下极易失控，难以妥善处理" },
+                { letter: "G", text: "预判突发状况，提前制定预案应对风险" }
+            ]
+        },
+        {
+            question: "你的口碑风评是？",
+            options: [
+                { letter: "A", text: "圈内顶级好评，人气与口碑双顶尖" },
+                { letter: "B", text: "大众公认不错，口碑稳定处于中等偏上" },
+                { letter: "C", text: "口碑两极，勤恳认可，但短板饱受吐槽" },
+                { letter: "D", text: "口碑平平，无功无过，大家评价很普通" },
+                { letter: "E", text: "口碑中等，为人本分，缺点就是太吵闹" },
+                { letter: "F", text: "整体口碑垫底，长期负面评价居多" },
+                { letter: "G", text: "评价由全局结果决定，是口碑规则的制定者" }
+            ]
+        },
+        {
+            question: "日常开销、磨合相处的成本是？",
+            options: [
+                { letter: "A", text: "前期投入成本高，后期体验价值极高" },
+                { letter: "B", text: "成本适中，性价比均衡，花销合理" },
+                { letter: "C", text: "前期成本低，后期老化整改的隐性成本高" },
+                { letter: "D", text: "磨合、维护成本极低，性价比极高" },
+                { letter: "E", text: "日常成本正常，没有额外高昂开销" },
+                { letter: "F", text: "后期维修维保成本极高，还容易售后无门" },
+                { letter: "G", text: "全盘把控预算成本，决定所有人的投入开销" }
+            ]
+        },
+        {
+            question: "你的专属标志性特点是？",
+            options: [
+                { letter: "A", text: "独一无二的稀缺性，独一无二不可复刻" },
+                { letter: "B", text: "均衡全能，没有明显短板，综合全能" },
+                { letter: "C", text: "布局怪异，悬挂硬朗，越亲近缺点越突出" },
+                { letter: "D", text: "朴实耐用，本土化，随处可见的务实特质" },
+                { letter: "E", text: "起步动静巨大，标志性外号轰炸机" },
+                { letter: "F", text: "底盘颠簸、电池拉胯，遇事爱甩锅是标签" },
+                { letter: "G", text: "全盘统筹决策，掌控所有角色的命运走向" }
+            ]
+        },
+        {
+            question: "如果用一句话总结自己，最合适的是？",
+            options: [
+                { letter: "A", text: "实力无可挑剔，奈何命运身不由己" },
+                { letter: "B", text: "稳定靠谱的中坚，平凡之中足够可靠" },
+                { letter: "C", text: "勤恳任劳任怨，奈何先天设计硬伤难改" },
+                { letter: "D", text: "本土平凡实干者，吃苦耐劳，适配日常" },
+                { letter: "E", text: "本性安分守己，只是行事吵闹惹人注意" },
+                { letter: "F", text: "先天底子不足，相处体验差，遇事爱推诿" },
+                { letter: "G", text: "执掌全局权衡利弊，决定全盘走向" }
+            ]
+        }
+    ];
+    
+    const resultDescriptions = {
+        G: "你是隐藏顶层决策者人格。你凌驾所有普通人之上，擅长统筹全局、权衡利弊、掌控规则、决定所有人的走向。理性、大局观强、深藏不露，是整个体系的掌控者。",
+        A: "你是 T0 绝版 18 米铰接天花板人格。你天赋出众、格局开阔、人品体面、待人舒适、实力顶尖。你本身没有任何问题，人生遗憾大多来自外界耽误、环境限制、生不逢时，永远被人怀念与珍惜。",
+        B: "你是 T1 百路佳 10 米中坚人格。你稳重靠谱、均衡全面、是团队主力、值得信任。虽然没有极致惊艳的特长，但你稳定、踏实、能扛事、待人友善，是生活里最靠谱的那类人。",
+        D: "你是 T2 晶马 8 米电烤人格。你接地气、随和、好相处、吃苦耐劳、非常耐用。你没什么架子、很好磨合，但不够细腻、共情偏弱、上限普通，是最真实、最普通的实干型普通人。",
+        C: "你是 T2 老款晶马 10 米人格。你勤恳老实、愿意付出、从不偷懒。但你思维老旧、做事混乱、规划奇怪、先天硬伤多。浅层相处没问题，深度相处缺点会持续暴露，让人别扭难受。",
+        E: "你是 T3 BLK 轰炸机人格。你为人本分、工作踏实、没有坏心思。但你性格急躁、行动吵闹、动静极大，很容易无意中打扰别人，是你改不掉的专属短板。",
+        F: "你是 T4 垫底老仿考人格。你先天底子薄弱、心态不稳、抗压差、容易掉链子。相处体验差、遇事爱推卸责任、不愿改变、不愿磨合，是所有人设里综合表现最差的类型。"
+    };
+    
+    const resultTitles = {
+        G: "隐藏终极角色：顶层决策者",
+        A: "T0 绝版天花板：18米现代铰接",
+        B: "T1 稳定中坚：百路佳10米",
+        D: "T2 朴实普通人：晶马8米电烤",
+        C: "T2 偏差型：老款晶马10米",
+        E: "T3 轰炸机型：BLK8米",
+        F: "T4 垫底型：早期老仿考"
+    };
+    
+    let currentQuestionIndex = 0;
+    let answers = {};
+    const totalQuestions = questions.length;
+    
+    function init() {
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+        loadQuestion();
+    }
+    
+    function loadQuestion() {
+        const question = questions[currentQuestionIndex];
+        
+        document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+        document.getElementById('progressFill').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+        document.getElementById('questionNumber').textContent = '第 ' + (currentQuestionIndex + 1) + ' 题';
+        document.getElementById('questionText').textContent = question.question;
+        
+        const optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.innerHTML = '';
+        
+        question.options.forEach(function(option) {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option' + (answers[currentQuestionIndex] === option.letter ? ' selected' : '');
+            optionDiv.onclick = function() { selectOption(option.letter); };
+            
+            const letterDiv = document.createElement('div');
+            letterDiv.className = 'option-letter';
+            letterDiv.textContent = option.letter;
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'option-text';
+            textDiv.textContent = option.text;
+            
+            optionDiv.appendChild(letterDiv);
+            optionDiv.appendChild(textDiv);
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        updateNavButtons();
+    }
+    
+    function selectOption(letter) {
+        answers[currentQuestionIndex] = letter;
+        
+        document.querySelectorAll('.option').forEach(function(opt) {
+            opt.classList.remove('selected');
+            if (opt.querySelector('.option-letter').textContent === letter) {
+                opt.classList.add('selected');
+            }
+        });
+        
+        updateNavButtons();
+    }
+    
+    function updateNavButtons() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        prevBtn.disabled = currentQuestionIndex === 0;
+        
+        if (currentQuestionIndex === totalQuestions - 1) {
+            nextBtn.textContent = '查看结果';
+            nextBtn.disabled = !answers[currentQuestionIndex];
+        } else {
+            nextBtn.textContent = '下一题';
+            nextBtn.disabled = !answers[currentQuestionIndex];
+        }
+    }
+    
+    function nextQuestion() {
+        if (currentQuestionIndex === totalQuestions - 1) {
+            showResult();
+        } else {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+    }
+    
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+    
+    function calculateResult() {
+        const counts = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0 };
+        
+        Object.values(answers).forEach(function(letter) {
+            if (counts.hasOwnProperty(letter)) {
+                counts[letter]++;
+            }
+        });
+        
+        const priority = ['G', 'A', 'B', 'D', 'C', 'E', 'F'];
+        let maxCount = 0;
+        priority.forEach(function(letter) {
+            if (counts[letter] > maxCount) {
+                maxCount = counts[letter];
+            }
+        });
+        
+        let result = 'F';
+        priority.forEach(function(letter) {
+            if (counts[letter] === maxCount) {
+                result = letter;
+            }
+        });
+        
+        return { result: result, counts: counts };
+    }
+    
+    function showResult() {
+        const resultData = calculateResult();
+        const result = resultData.result;
+        const counts = resultData.counts;
+        
+        document.getElementById('questionContainer').style.display = 'none';
+        document.querySelector('.nav-buttons').style.display = 'none';
+        document.querySelector('.mbti-header .progress-text').style.display = 'none';
+        
+        const resultContainer = document.getElementById('resultContainer');
+        resultContainer.classList.add('show');
+        
+        const badge = document.getElementById('resultBadge');
+        badge.textContent = result;
+        badge.className = 'result-badge ' + result;
+        
+        document.getElementById('resultTitle').textContent = resultTitles[result];
+        document.getElementById('resultSubtitle').textContent = '你的车型人格是：' + result;
+        
+        const statsContainer = document.getElementById('statsContainer');
+        statsContainer.innerHTML = '';
+        ['G', 'A', 'B', 'D', 'C', 'E', 'F'].forEach(function(letter) {
+            const statItem = document.createElement('div');
+            statItem.className = 'stat-item';
+            statItem.textContent = letter + ': ' + counts[letter] + '次';
+            statsContainer.appendChild(statItem);
+        });
+        
+        document.getElementById('resultDescription').textContent = resultDescriptions[result];
+    }
+    
+    function restartTest() {
+        currentQuestionIndex = 0;
+        answers = {};
+        
+        document.getElementById('resultContainer').classList.remove('show');
+        document.getElementById('questionContainer').style.display = 'block';
+        document.querySelector('.nav-buttons').style.display = 'flex';
+        document.querySelector('.mbti-header .progress-text').style.display = 'block';
+        
+        loadQuestion();
+    }
+    
+    window.onload = function() {
+        init();
+    };
+    </script>
+</body>
+</html>
