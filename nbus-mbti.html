@@ -101,25 +101,9 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        .option-letter {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .option.selected .option-letter {
-            background: white;
-            color: #667eea;
-        }
         .option-text {
-            flex: 1;
             line-height: 1.5;
+            padding: 10px 15px;
         }
         
         .nav-buttons {
@@ -283,7 +267,18 @@
     </div>
     
     <script>
-    const questions = [
+    // 打乱数组顺序
+    function shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+    
+    // 完整题库 (32题)
+    const allQuestions = [
         {
             question: "别人对你的整体长期评价大多是？",
             options: [
@@ -321,7 +316,7 @@
             ]
         },
         {
-            question: "自身短板出现问题时，你的处理方式是？",
+            question: "自身短板出现问题时，你的处理方式？",
             options: [
                 { letter: "A", text: "问题大多来自外部环境，自身没有核心问题" },
                 { letter: "B", text: "主动解决问题，小失误坦然接受" },
@@ -333,7 +328,7 @@
             ]
         },
         {
-            question: "在集体团队里你的定位是？",
+            question: "在集体团队里你的定位？",
             options: [
                 { letter: "A", text: "稀缺的顶尖核心，无可替代" },
                 { letter: "B", text: "中坚骨干，扛住大部分主力工作" },
@@ -381,7 +376,7 @@
             ]
         },
         {
-            question: "长久之后，身边人对你的回忆是？",
+            question: "长久之后，身边人对你的回忆？",
             options: [
                 { letter: "A", text: "自带情怀滤镜，即便退场依旧被大家怀念" },
                 { letter: "B", text: "一直稳定可靠，是长久靠谱的老朋友" },
@@ -393,7 +388,7 @@
             ]
         },
         {
-            question: "先天的自身底子天赋是？",
+            question: "先天的自身底子天赋？",
             options: [
                 { letter: "A", text: "出厂配置顶配，硬件底子十分优秀" },
                 { letter: "B", text: "原厂配置标准主力款，综合配置均衡" },
@@ -405,7 +400,7 @@
             ]
         },
         {
-            question: "遭遇外界大环境变故，你会？",
+            question: "遭遇外界大环境变故（大环境行情变差），你会？",
             options: [
                 { letter: "A", text: "本身实力完好，被迫受大势影响走向落幕" },
                 { letter: "B", text: "可以适应环境变化，稳定正常运转" },
@@ -417,7 +412,7 @@
             ]
         },
         {
-            question: "别人想要对你进行磨合、改变你的缺点，结果是？",
+            question: "别人想要对你进行磨合、改变你的缺点，结果？",
             options: [
                 { letter: "A", text: "不需要改动底子，只需要改善外部环境即可" },
                 { letter: "B", text: "小缺点可以轻松磨合完善" },
@@ -441,7 +436,7 @@
             ]
         },
         {
-            question: "待人包容度如何？",
+            question: "待人包容度，接纳身边不同的人？",
             options: [
                 { letter: "A", text: "包容力极强，可以接纳各类人与事" },
                 { letter: "B", text: "包容性适中，待人宽厚，兼顾所有人" },
@@ -453,7 +448,7 @@
             ]
         },
         {
-            question: "外形与外在气质观感是？",
+            question: "外形与外在气质观感？",
             options: [
                 { letter: "A", text: "造型独特稀有，外观质感高级少见" },
                 { letter: "B", text: "大气规整的主流款式，耐看稳重" },
@@ -477,7 +472,7 @@
             ]
         },
         {
-            question: "你的上限发展潜力是？",
+            question: "你的上限发展潜力？",
             options: [
                 { letter: "A", text: "上限天花板，潜力极高，只是容易被外界限制" },
                 { letter: "B", text: "上限中等偏上，安稳发展就能稳步变强" },
@@ -489,7 +484,7 @@
             ]
         },
         {
-            question: "长期时间流逝，自身损耗老化速度是？",
+            question: "长期时间流逝，自身损耗老化速度？",
             options: [
                 { letter: "A", text: "本体耐用度优秀，老化速度很慢" },
                 { letter: "B", text: "老化平缓，日常损耗在合理范围内" },
@@ -513,7 +508,7 @@
             ]
         },
         {
-            question: "出身环境与适配圈子是？",
+            question: "出身环境与适配圈子？",
             options: [
                 { letter: "A", text: "外来高端技术底子，小众高端圈层受欢迎" },
                 { letter: "B", text: "本土主流通用出身，适配绝大多数主流圈子" },
@@ -525,7 +520,7 @@
             ]
         },
         {
-            question: "突如其来的突发状况来临，你的反应是？",
+            question: "突如其来的突发状况来临，你的反应？",
             options: [
                 { letter: "A", text: "本身足以应对，问题根源在于前期筹备搁置" },
                 { letter: "B", text: "冷静从容应对，平稳化解突发问题" },
@@ -537,7 +532,7 @@
             ]
         },
         {
-            question: "你的口碑风评是？",
+            question: "你的口碑风评（圈子内大众看法）？",
             options: [
                 { letter: "A", text: "圈内顶级好评，人气与口碑双顶尖" },
                 { letter: "B", text: "大众公认不错，口碑稳定处于中等偏上" },
@@ -549,7 +544,7 @@
             ]
         },
         {
-            question: "日常开销、磨合相处的成本是？",
+            question: "日常开销、磨合相处的成本？",
             options: [
                 { letter: "A", text: "前期投入成本高，后期体验价值极高" },
                 { letter: "B", text: "成本适中，性价比均衡，花销合理" },
@@ -561,7 +556,7 @@
             ]
         },
         {
-            question: "你的专属标志性特点是？",
+            question: "你的专属标志性特点？",
             options: [
                 { letter: "A", text: "独一无二的稀缺性，独一无二不可复刻" },
                 { letter: "B", text: "均衡全能，没有明显短板，综合全能" },
@@ -582,6 +577,906 @@
                 { letter: "E", text: "本性安分守己，只是行事吵闹惹人注意" },
                 { letter: "F", text: "先天底子不足，相处体验差，遇事爱推诿" },
                 { letter: "G", text: "执掌全局权衡利弊，决定全盘走向" }
+            ]
+        },
+        {
+            question: "面对他人的批评建议，你通常会？",
+            options: [
+                { letter: "A", text: "虚心听取，但问题多不在自身" },
+                { letter: "B", text: "理性接纳，有则改之无则加勉" },
+                { letter: "C", text: "表面接受，实际很难做出改变" },
+                { letter: "D", text: "不放在心上，按自己的方式继续" },
+                { letter: "E", text: "容易急躁反驳，不愿被人指责" },
+                { letter: "F", text: "抵触反感，认为对方在故意针对" },
+                { letter: "G", text: "判断建议价值，决定是否采纳推广" }
+            ]
+        },
+        {
+            question: "你在学习新技能时的表现是？",
+            options: [
+                { letter: "A", text: "上手极快，天赋拉满，一点就通" },
+                { letter: "B", text: "稳步学习，扎实掌握，循序渐进" },
+                { letter: "C", text: "学得慢，思路僵化，难以灵活运用" },
+                { letter: "D", text: "能学会基础用法，不求精通" },
+                { letter: "E", text: "学得快但毛躁，容易粗心出错" },
+                { letter: "F", text: "学习吃力，很难坚持，容易放弃" },
+                { letter: "G", text: "规划学习体系，安排他人学习方向" }
+            ]
+        },
+        {
+            question: "你处理生活琐事的态度是？",
+            options: [
+                { letter: "A", text: "不屑于纠结小事，着眼大事" },
+                { letter: "B", text: "认真处理，有条不紊不出差错" },
+                { letter: "C", text: "杂乱无章，经常丢三落四" },
+                { letter: "D", text: "随意应付，能过得去就行" },
+                { letter: "E", text: "风风火火，快速解决但动静大" },
+                { letter: "F", text: "敷衍了事，出问题就逃避" },
+                { letter: "G", text: "统筹安排琐事分工，提升整体效率" }
+            ]
+        },
+        {
+            question: "朋友向你倾诉烦恼，你会？",
+            options: [
+                { letter: "A", text: "耐心开导，给出高格局建议" },
+                { letter: "B", text: "认真倾听，给予踏实安慰" },
+                { letter: "C", text: "试图安慰但逻辑混乱，越劝越糟" },
+                { letter: "D", text: "默默陪伴，简单附和" },
+                { letter: "E", text: "热心回应，但语气急躁嗓门大" },
+                { letter: "F", text: "不耐烦，觉得对方矫情麻烦" },
+                { letter: "G", text: "理性分析利弊，给出最优解决方案" }
+            ]
+        },
+        {
+            question: "在排队、等待等场景中你的表现？",
+            options: [
+                { letter: "A", text: "淡定从容，格局开阔不急躁" },
+                { letter: "B", text: "安静等待，遵守秩序有耐心" },
+                { letter: "C", text: "焦躁不安，小动作不断" },
+                { letter: "D", text: "无所谓，耐心一般但能坚持" },
+                { letter: "E", text: "烦躁易怒，频繁抱怨动静大" },
+                { letter: "F", text: "直接插队或放弃，不愿等待" },
+                { letter: "G", text: "维护秩序，制定或遵守排队规则" }
+            ]
+        },
+        {
+            question: "你对自己未来的规划是？",
+            options: [
+                { letter: "A", text: "目标远大，却常被现实阻碍" },
+                { letter: "B", text: "清晰务实，一步一个脚印实现" },
+                { letter: "C", text: "没有规划，走一步看一步混乱" },
+                { letter: "D", text: "只求安稳，没有太高追求" },
+                { letter: "E", text: "有想法但冲动，容易半途而废" },
+                { letter: "F", text: "毫无规划，得过且过摆烂" },
+                { letter: "G", text: "规划自身与他人未来，掌控方向" }
+            ]
+        },
+        {
+            question: "你借东西给他人后的心态是？",
+            options: [
+                { letter: "A", text: "大方不计较，相信他人自觉" },
+                { letter: "B", text: "放心借出，相信对方会妥善保管" },
+                { letter: "C", text: "担心对方弄坏，内心纠结" },
+                { letter: "D", text: "无所谓，不值钱的东西随意" },
+                { letter: "E", text: "反复叮嘱，语气急躁显得啰嗦" },
+                { letter: "F", text: "不愿借出，怕对方不还或损坏" },
+                { letter: "G", text: "明确借用规则，约束双方行为" }
+            ]
+        },
+        {
+            question: "你在群体聊天中的状态是？",
+            options: [
+                { letter: "A", text: "话语有分量，众人愿意倾听" },
+                { letter: "B", text: "温和发言，调节气氛很融洽" },
+                { letter: "C", text: "发言逻辑混乱，容易冷场" },
+                { letter: "D", text: "默默围观，很少主动说话" },
+                { letter: "E", text: "嗓门大发言多，容易盖过他人" },
+                { letter: "F", text: "消极发言，传播负面情绪" },
+                { letter: "G", text: "引导话题走向，掌控聊天节奏" }
+            ]
+        },
+        {
+            question: "面对他人的求助，你的第一反应是？",
+            options: [
+                { letter: "A", text: "全力相助，能力范围内倾尽全力" },
+                { letter: "B", text: "爽快答应，靠谱完成托付" },
+                { letter: "C", text: "答应后慌乱，容易帮倒忙" },
+                { letter: "D", text: "能帮就帮，不勉强自己" },
+                { letter: "E", text: "热心答应，但过程急躁吵闹" },
+                { letter: "F", text: "找借口拒绝，不想麻烦" },
+                { letter: "G", text: "评估求助价值，决定是否调配资源" }
+            ]
+        },
+        {
+            question: "你犯错后的第一反应是？",
+            options: [
+                { letter: "A", text: "反思环境因素，自身无大错" },
+                { letter: "B", text: "主动承认，及时弥补错误" },
+                { letter: "C", text: "不知所措，慌乱无措" },
+                { letter: "D", text: "默默改正，不想被人提及" },
+                { letter: "E", text: "烦躁懊恼，情绪激动" },
+                { letter: "F", text: "推卸责任，找理由辩解" },
+                { letter: "G", text: "复盘错误原因，完善规则避免再犯" }
+            ]
+        },
+        {
+            question: "你对时尚、外在装扮的态度？",
+            options: [
+                { letter: "A", text: "品味高级，风格独特有质感" },
+                { letter: "B", text: "简约大方，得体舒适不出错" },
+                { letter: "C", text: "搭配混乱，审美老旧土气" },
+                { letter: "D", text: "随意朴素，实用为主不讲究" },
+                { letter: "E", text: "穿搭普通，行为张扬抢眼球" },
+                { letter: "F", text: "邋遢随意，完全不在意形象" },
+                { letter: "G", text: "不重外表，注重内在实力与规则" }
+            ]
+        },
+        {
+            question: "你处理金钱消费的方式是？",
+            options: [
+                { letter: "A", text: "注重品质，不计较小额花费" },
+                { letter: "B", text: "理性消费，收支平衡有规划" },
+                { letter: "C", text: "花钱无度，理财混乱月光" },
+                { letter: "D", text: "节俭务实，只买刚需用品" },
+                { letter: "E", text: "冲动消费，喜欢就买不计后果" },
+                { letter: "F", text: "超前消费，负债还推卸责任" },
+                { letter: "G", text: "掌控财务分配，规划资金用途" }
+            ]
+        },
+        {
+            question: "你在运动、体力活动中的表现？",
+            options: [
+                { letter: "A", text: "天赋极佳，表现亮眼但易受限" },
+                { letter: "B", text: "表现稳定，耐力体力都不错" },
+                { letter: "C", text: "动作笨拙，协调性差易受伤" },
+                { letter: "D", text: "吃苦耐劳，能坚持完成任务" },
+                { letter: "E", text: "精力旺盛，动作幅度大噪音大" },
+                { letter: "F", text: "体力极差，轻易放弃喊累" },
+                { letter: "G", text: "组织运动项目，制定比赛规则" }
+            ]
+        },
+        {
+            question: "你对新鲜事物的接受程度？",
+            options: [
+                { letter: "A", text: "乐于接受，有独到见解" },
+                { letter: "B", text: "平稳接受，慢慢适应融入" },
+                { letter: "C", text: "抵触排斥，不愿接受新事物" },
+                { letter: "D", text: "无所谓，能用就行不挑剔" },
+                { letter: "E", text: "好奇但急躁，没耐心深入了解" },
+                { letter: "F", text: "完全拒绝，害怕改变" },
+                { letter: "G", text: "筛选新鲜事物，决定推广范围" }
+            ]
+        },
+        {
+            question: "你在家居、环境整理上的表现？",
+            options: [
+                { letter: "A", text: "整洁高级，布局精致有格调" },
+                { letter: "B", text: "干净整齐，收纳有序舒适" },
+                { letter: "C", text: "杂乱无章，东西堆放混乱" },
+                { letter: "D", text: "简单整洁，不讲究精致" },
+                { letter: "E", text: "收拾时动静大，毛手毛脚" },
+                { letter: "F", text: "脏乱差，从不主动整理" },
+                { letter: "G", text: "规划空间布局，制定整理标准" }
+            ]
+        },
+        {
+            question: "你被人误解时的处理方式？",
+            options: [
+                { letter: "A", text: "淡然处之，懂的人自然懂" },
+                { letter: "B", text: "耐心解释，澄清误会即可" },
+                { letter: "C", text: "越解释越乱，逻辑混乱" },
+                { letter: "D", text: "不想解释，随他人评价" },
+                { letter: "E", text: "急躁争辩，声音大情绪激动" },
+                { letter: "F", text: "记恨在心，不愿和解" },
+                { letter: "G", text: "理性澄清，维护自身规则信誉" }
+            ]
+        },
+        {
+            question: "你在工作学习中的专注度？",
+            options: [
+                { letter: "A", text: "专注度极高，效率天赋出众" },
+                { letter: "B", text: "专注稳定，持续输出不松懈" },
+                { letter: "C", text: "容易分心，做事三心二意" },
+                { letter: "D", text: "能专注基础任务，复杂则不行" },
+                { letter: "E", text: "专注时短，容易急躁分心" },
+                { letter: "F", text: "毫无专注，频繁走神摆烂" },
+                { letter: "G", text: "把控专注节奏，分配任务时长" }
+            ]
+        },
+        {
+            question: "你对他人隐私的态度？",
+            options: [
+                { letter: "A", text: "尊重隐私，有边界感有格局" },
+                { letter: "B", text: "自觉守护，不打探不传播" },
+                { letter: "C", text: "无心泄露，说话没分寸" },
+                { letter: "D", text: "不刻意关注，也不太在意" },
+                { letter: "E", text: "好奇打探，说话大声易传开" },
+                { letter: "F", text: "随意传播，不顾他人感受" },
+                { letter: "G", text: "制定隐私规则，约束他人行为" }
+            ]
+        },
+        {
+            question: "你遇到喜欢的人时的表现？",
+            options: [
+                { letter: "A", text: "温柔体面，举止优雅有魅力" },
+                { letter: "B", text: "稳重真诚，踏实付出有安全感" },
+                { letter: "C", text: "笨拙木讷，表达方式奇怪" },
+                { letter: "D", text: "平淡朴实，默默陪伴" },
+                { letter: "E", text: "热情急躁，表达方式直白吵闹" },
+                { letter: "F", text: "自卑退缩，不愿主动争取" },
+                { letter: "G", text: "理性权衡关系，把控相处节奏" }
+            ]
+        },
+        {
+            question: "你应对失败挫折的态度？",
+            options: [
+                { letter: "A", text: "实力仍在，只是时运不济" },
+                { letter: "B", text: "重整旗鼓，总结经验再来" },
+                { letter: "C", text: "一蹶不振，心态崩溃混乱" },
+                { letter: "D", text: "坦然接受，平淡看待得失" },
+                { letter: "E", text: "暴躁易怒，发泄负面情绪" },
+                { letter: "F", text: "逃避失败，指责他人环境" },
+                { letter: "G", text: "复盘失败全局，优化策略规则" }
+            ]
+        },
+        {
+            question: "你在聚会、社交场合的表现？",
+            options: [
+                { letter: "A", text: "全场焦点，气质出众受欢迎" },
+                { letter: "B", text: "气氛担当，随和友善人缘好" },
+                { letter: "C", text: "格格不入，言行尴尬别扭" },
+                { letter: "D", text: "低调融入，不显眼不突兀" },
+                { letter: "E", text: "活跃吵闹，容易打扰他人" },
+                { letter: "F", text: "消极孤僻，破坏聚会氛围" },
+                { letter: "G", text: "掌控聚会流程，协调全场关系" }
+            ]
+        },
+        {
+            question: "你对承诺、约定的遵守度？",
+            options: [
+                { letter: "A", text: "信守承诺，只因外部因素失约" },
+                { letter: "B", text: "言出必行，靠谱守时守信" },
+                { letter: "C", text: "经常忘记，履约能力混乱" },
+                { letter: "D", text: "尽量遵守，小事无所谓" },
+                { letter: "E", text: "容易急躁迟到，履约毛躁" },
+                { letter: "F", text: "随意毁约，找借口推脱" },
+                { letter: "G", text: "制定约定规则，监督他人履约" }
+            ]
+        },
+        {
+            question: "你的情绪控制能力如何？",
+            options: [
+                { letter: "A", text: "情绪稳定，格局大不易波动" },
+                { letter: "B", text: "心态平和，小情绪能自我调节" },
+                { letter: "C", text: "情绪敏感，小事容易波动大" },
+                { letter: "D", text: "情绪平淡，无太大起伏" },
+                { letter: "E", text: "情绪外露，急躁易怒嗓门大" },
+                { letter: "F", text: "情绪失控，经常摆烂发脾气" },
+                { letter: "G", text: "理性压制情绪，以大局为重" }
+            ]
+        },
+        {
+            question: "你分享东西、资源的意愿？",
+            options: [
+                { letter: "A", text: "大方分享，格局开阔不吝啬" },
+                { letter: "B", text: "乐于分享，公平待人不自私" },
+                { letter: "C", text: "不愿分享，小气固执老旧" },
+                { letter: "D", text: "可以分享，不挑剔不计较" },
+                { letter: "E", text: "愿意分享，但语气急躁强势" },
+                { letter: "F", text: "拒绝分享，自私自利" },
+                { letter: "G", text: "分配资源，制定分享规则" }
+            ]
+        },
+        {
+            question: "你学习、工作的效率表现？",
+            options: [
+                { letter: "A", text: "效率天花板，天赋决定速度" },
+                { letter: "B", text: "效率稳定，保质保量完成" },
+                { letter: "C", text: "效率低下，做事拖沓混乱" },
+                { letter: "D", text: "效率一般，完成基础任务" },
+                { letter: "E", text: "效率时高时低，急躁毛躁" },
+                { letter: "F", text: "效率极差，拖延摆烂完不成" },
+                { letter: "G", text: "规划效率体系，提升整体进度" }
+            ]
+        },
+        {
+            question: "面对竞争场景，你的心态是？",
+            options: [
+                { letter: "A", text: "实力碾压，无奈外部限制" },
+                { letter: "B", text: "从容竞争，凭实力稳步取胜" },
+                { letter: "C", text: "慌乱紧张，发挥失常混乱" },
+                { letter: "D", text: "佛系参与，不争不抢" },
+                { letter: "E", text: "激进好胜，竞争时吵闹急躁" },
+                { letter: "F", text: "畏惧竞争，直接放弃摆烂" },
+                { letter: "G", text: "制定竞争规则，评判胜负标准" }
+            ]
+        },
+        {
+            question: "你照顾他人、关心他人的方式？",
+            options: [
+                { letter: "A", text: "细致周全，体面贴心有温度" },
+                { letter: "B", text: "踏实靠谱，给予实际帮助" },
+                { letter: "C", text: "方式笨拙，容易弄巧成拙" },
+                { letter: "D", text: "简单朴实，日常点滴关心" },
+                { letter: "E", text: "热心直接，语气急躁嗓门大" },
+                { letter: "F", text: "漠不关心，只顾自己" },
+                { letter: "G", text: "统筹关怀分配，兼顾整体需求" }
+            ]
+        },
+        {
+            question: "你对规则、制度的态度？",
+            options: [
+                { letter: "A", text: "遵守规则，更能理解规则本质" },
+                { letter: "B", text: "自觉遵守，维护秩序规范" },
+                { letter: "C", text: "无视规则，行事随心所欲" },
+                { letter: "D", text: "被动遵守，不反抗不主动" },
+                { letter: "E", text: "嫌规则麻烦，容易打破吵闹" },
+                { letter: "F", text: "故意违反，还推卸责任" },
+                { letter: "G", text: "制定规则，引领他人遵守" }
+            ]
+        },
+        {
+            question: "你的记忆力、细节把控能力？",
+            options: [
+                { letter: "A", text: "过目不忘，细节把控精准" },
+                { letter: "B", text: "记忆稳定，重要细节不遗漏" },
+                { letter: "C", text: "记忆混乱，经常丢三落四" },
+                { letter: "D", text: "记忆一般，只记基础内容" },
+                { letter: "E", text: "记东西快，粗心遗漏细节" },
+                { letter: "F", text: "记忆极差，转头就忘" },
+                { letter: "G", text: "记忆关键框架，把控全局细节" }
+            ]
+        },
+        {
+            question: "你在雨天、恶劣天气的状态？",
+            options: [
+                { letter: "A", text: "从容淡定，不受环境影响" },
+                { letter: "B", text: "平稳应对，照常行事不受扰" },
+                { letter: "C", text: "烦躁不安，状态下滑混乱" },
+                { letter: "D", text: "照常生活，适应能力强" },
+                { letter: "E", text: "情绪急躁，抱怨动静大" },
+                { letter: "F", text: "消极摆烂，不愿出门做事" },
+                { letter: "G", text: "规划恶劣天气应对方案" }
+            ]
+        },
+        {
+            question: "你对美食、饮食的追求？",
+            options: [
+                { letter: "A", text: "注重品质，品味高级有格调" },
+                { letter: "B", text: "均衡饮食，健康规律不挑剔" },
+                { letter: "C", text: "饮食混乱，暴饮暴食不规律" },
+                { letter: "D", text: "随意饱腹，好吃实惠就行" },
+                { letter: "E", text: "吃饭急躁，狼吞虎咽动静大" },
+                { letter: "F", text: "挑食偏食，浪费食物还抱怨" },
+                { letter: "G", text: "规划饮食搭配，制定健康标准" }
+            ]
+        },
+        {
+            question: "你处理家庭矛盾的方式？",
+            options: [
+                { letter: "A", text: "居中调和，格局开阔解纷争" },
+                { letter: "B", text: "耐心劝解，稳定家庭氛围" },
+                { letter: "C", text: "越帮越乱，激化矛盾" },
+                { letter: "D", text: "默默旁观，不参与不表态" },
+                { letter: "E", text: "急躁插话，声音大加剧争吵" },
+                { letter: "F", text: "逃避矛盾，甩锅不管" },
+                { letter: "G", text: "制定家庭相处规则，平衡关系" }
+            ]
+        },
+        {
+            question: "你的执行力、行动能力？",
+            options: [
+                { letter: "A", text: "执行力极强，受外部条件限制" },
+                { letter: "B", text: "执行力稳定，说到做到" },
+                { letter: "C", text: "执行力差，拖延混乱不行动" },
+                { letter: "D", text: "执行力一般，完成基础任务" },
+                { letter: "E", text: "执行力急躁，行动毛躁动静大" },
+                { letter: "F", text: "毫无执行力，彻底摆烂" },
+                { letter: "G", text: "规划执行流程，监督他人行动" }
+            ]
+        },
+        {
+            question: "你对电子产品、工具的使用能力？",
+            options: [
+                { letter: "A", text: "上手极快，精通操作有天赋" },
+                { letter: "B", text: "熟练使用，轻松掌握功能" },
+                { letter: "C", text: "操作混乱，经常出错搞不懂" },
+                { letter: "D", text: "会基础用法，复杂功能不会" },
+                { letter: "E", text: "使用急躁，容易大力操作损坏" },
+                { letter: "F", text: "不会使用，还责怪产品质量" },
+                { letter: "G", text: "筛选工具用途，制定使用规范" }
+            ]
+        },
+        {
+            question: "你旅行、出门远行的准备状态？",
+            options: [
+                { letter: "A", text: "规划周全，格调高级体验好" },
+                { letter: "B", text: "准备充分，稳妥舒适不出错" },
+                { letter: "C", text: "准备混乱，丢东西忘物品" },
+                { letter: "D", text: "简单收拾，够用就行不讲究" },
+                { letter: "E", text: "收拾急躁，翻找动静大吵闹" },
+                { letter: "F", text: "毫无准备，出门手忙脚乱" },
+                { letter: "G", text: "规划旅行路线，统筹行程安排" }
+            ]
+        },
+        {
+            question: "你对小动物、孩童的耐心？",
+            options: [
+                { letter: "A", text: "耐心十足，温柔包容有爱心" },
+                { letter: "B", text: "耐心稳定，细心照顾陪伴" },
+                { letter: "C", text: "耐心不足，容易烦躁无措" },
+                { letter: "D", text: "有基础耐心，不排斥不亲近" },
+                { letter: "E", text: "耐心短暂，急躁嗓门大吓到对方" },
+                { letter: "F", text: "毫无耐心，厌恶躲避" },
+                { letter: "G", text: "规范相处方式，保护弱小秩序" }
+            ]
+        },
+        {
+            question: "你完成复杂任务的表现？",
+            options: [
+                { letter: "A", text: "完美胜任，无奈外部阻碍" },
+                { letter: "B", text: "稳步推进，顺利完成复杂任务" },
+                { letter: "C", text: "逻辑混乱，任务拆分一团糟" },
+                { letter: "D", text: "能完成基础部分，复杂则放弃" },
+                { letter: "E", text: "急躁推进，粗心出错返工多" },
+                { letter: "F", text: "直接放弃，甩锅任务太难" },
+                { letter: "G", text: "拆解复杂任务，分配执行环节" }
+            ]
+        },
+        {
+            question: "你对过往回忆的态度？",
+            options: [
+                { letter: "A", text: "珍藏美好，遗憾多来自外界" },
+                { letter: "B", text: "平和怀念，珍惜过往经历" },
+                { letter: "C", text: "纠结遗憾，陷入负面回忆" },
+                { letter: "D", text: "平淡看待，回忆无波澜" },
+                { letter: "E", text: "回忆激动，说起往事嗓门大" },
+                { letter: "F", text: "抱怨过往，指责他人不公" },
+                { letter: "G", text: "提炼过往经验，完善未来规则" }
+            ]
+        },
+        {
+            question: "你在公共场合的行为举止？",
+            options: [
+                { letter: "A", text: "优雅得体，维护公共形象" },
+                { letter: "B", text: "文明守礼，不影响他人" },
+                { letter: "C", text: "举止随意，不顾公共秩序" },
+                { letter: "D", text: "低调普通，不惹麻烦" },
+                { letter: "E", text: "举止张扬，说话吵闹影响他人" },
+                { letter: "F", text: "行为失礼，破坏公共环境" },
+                { letter: "G", text: "维护公共秩序，引导文明行为" }
+            ]
+        },
+        {
+            question: "你应对他人炫耀的态度？",
+            options: [
+                { letter: "A", text: "淡然无视，格局自信不攀比" },
+                { letter: "B", text: "平和祝福，不嫉妒不反感" },
+                { letter: "C", text: "自卑酸涩，心态失衡混乱" },
+                { letter: "D", text: "无所谓，不关心不在意" },
+                { letter: "E", text: "不服反驳，语气急躁大声" },
+                { letter: "F", text: "酸言酸语，恶意诋毁" },
+                { letter: "G", text: "理性看待，不被情绪左右" }
+            ]
+        },
+        {
+            question: "你的睡眠、作息规律度？",
+            options: [
+                { letter: "A", text: "作息规律，睡眠质量极佳" },
+                { letter: "B", text: "作息稳定，睡眠状态良好" },
+                { letter: "C", text: "作息混乱，失眠多梦易惊醒" },
+                { letter: "D", text: "作息随意，睡眠质量一般" },
+                { letter: "E", text: "作息急躁，熬夜赖床动静大" },
+                { letter: "F", text: "昼夜颠倒，摆烂不规律" },
+                { letter: "G", text: "规划作息制度，保持整体状态" }
+            ]
+        },
+        {
+            question: "你赠送礼物、表达心意的方式？",
+            options: [
+                { letter: "A", text: "精致用心，格调高级有诚意" },
+                { letter: "B", text: "实用贴心，踏实真诚不浮夸" },
+                { letter: "C", text: "心意到位，选择奇怪不合心意" },
+                { letter: "D", text: "简单朴实，平价实用为主" },
+                { letter: "E", text: "直接大方，表达急躁嗓门大" },
+                { letter: "F", text: "敷衍了事，不愿花费心思" },
+                { letter: "G", text: "权衡心意价值，选择合适方式" }
+            ]
+        },
+        {
+            question: "你处理工作学习与休息的平衡？",
+            options: [
+                { letter: "A", text: "高效完成，合理休息有格局" },
+                { letter: "B", text: "劳逸结合，平衡得当状态好" },
+                { letter: "C", text: "失衡混乱，要么拼命要么摆烂" },
+                { letter: "D", text: "侧重休息，工作学习敷衍" },
+                { letter: "E", text: "休息工作都急躁，动静大" },
+                { letter: "F", text: "只休息不工作，彻底摆烂" },
+                { letter: "G", text: "制定平衡规则，合理分配时间" }
+            ]
+        },
+        {
+            question: "你对谣言、八卦的态度？",
+            options: [
+                { letter: "A", text: "不信不传，有独立判断格局" },
+                { letter: "B", text: "不关注不传播，坚守本心" },
+                { letter: "C", text: "轻易相信，跟风传播混乱" },
+                { letter: "D", text: "无所谓，听听就过不较真" },
+                { letter: "E", text: "热衷传播，说话大声添油加醋" },
+                { letter: "F", text: "编造谣言，恶意诋毁他人" },
+                { letter: "G", text: "澄清谣言，维护真实信息规则" }
+            ]
+        },
+        {
+            question: "你动手能力、手工操作水平？",
+            options: [
+                { letter: "A", text: "天赋极佳，动手能力天花板" },
+                { letter: "B", text: "动手稳定，操作熟练不出错" },
+                { letter: "C", text: "动手笨拙，经常损坏物品" },
+                { letter: "D", text: "能做基础手工，复杂不行" },
+                { letter: "E", text: "动手急躁，大力操作噪音大" },
+                { letter: "F", text: "动手极差，完全不愿尝试" },
+                { letter: "G", text: "规划动手流程，制定操作标准" }
+            ]
+        },
+        {
+            question: "面对他人的成功，你的心态？",
+            options: [
+                { letter: "A", text: "真诚祝福，欣赏对方实力" },
+                { letter: "B", text: "真心祝贺，向对方学习" },
+                { letter: "C", text: "嫉妒失衡，心态别扭难受" },
+                { letter: "D", text: "平淡看待，与自己无关" },
+                { letter: "E", text: "羡慕急躁，言语大声酸溜溜" },
+                { letter: "F", text: "恶意诋毁，认为对方运气好" },
+                { letter: "G", text: "理性分析成功原因，借鉴规则" }
+            ]
+        },
+        {
+            question: "你日常说话、表达的语气？",
+            options: [
+                { letter: "A", text: "温和沉稳，语气得体有格局" },
+                { letter: "B", text: "平和亲切，让人听着舒服" },
+                { letter: "C", text: "逻辑混乱，表达别扭难懂" },
+                { letter: "D", text: "平淡直白，语气普通无特色" },
+                { letter: "E", text: "急躁大声，语气强势吵闹" },
+                { letter: "F", text: "消极抱怨，语气负能量满满" },
+                { letter: "G", text: "简洁理性，以表达规则为主" }
+            ]
+        },
+        {
+            question: "你对健康、身体管理的态度？",
+            options: [
+                { letter: "A", text: "注重管理，状态极佳有天赋" },
+                { letter: "B", text: "规律保养，健康状态稳定" },
+                { letter: "C", text: "忽视健康，作息饮食混乱" },
+                { letter: "D", text: "随意对待，小病小痛不在意" },
+                { letter: "E", text: "管理急躁，运动饮食不规律" },
+                { letter: "F", text: "彻底摆烂，损害健康还抱怨" },
+                { letter: "G", text: "制定健康管理方案，保持状态" }
+            ]
+        },
+        {
+            question: "你组织活动、聚会的能力？",
+            options: [
+                { letter: "A", text: "组织能力顶级，效果完美出众" },
+                { letter: "B", text: "组织稳妥，活动顺利氛围好" },
+                { letter: "C", text: "组织混乱，环节漏洞百出" },
+                { letter: "D", text: "能参与组织，不擅长主导" },
+                { letter: "E", text: "组织急躁，指挥大声吵闹" },
+                { letter: "F", text: "拒绝组织，甩锅麻烦" },
+                { letter: "G", text: "统筹活动全局，制定流程规则" }
+            ]
+        },
+        {
+            question: "你面对选择、决策时的表现？",
+            options: [
+                { letter: "A", text: "决策精准，无奈外部限制" },
+                { letter: "B", text: "决策稳妥，不纠结不后悔" },
+                { letter: "C", text: "决策混乱，反复纠结内耗" },
+                { letter: "D", text: "随意选择，不深思不计较" },
+                { letter: "E", text: "决策急躁，冲动选择后悔" },
+                { letter: "F", text: "逃避决策，摆烂听天由命" },
+                { letter: "G", text: "主导决策，掌控选择方向" }
+            ]
+        },
+        {
+            question: "你对书籍、知识的态度？",
+            options: [
+                { letter: "A", text: "博览群书，知识格局极高" },
+                { letter: "B", text: "认真学习，积累实用知识" },
+                { letter: "C", text: "不爱读书，知识储备老旧" },
+                { letter: "D", text: "读基础书籍，不求甚解" },
+                { letter: "E", text: "读书急躁，翻书快不仔细" },
+                { letter: "F", text: "拒绝读书，厌恶学习" },
+                { letter: "G", text: "筛选知识体系，规划学习方向" }
+            ]
+        },
+        {
+            question: "你处理邻里、周边关系的方式？",
+            options: [
+                { letter: "A", text: "和睦体面，格局开阔好相处" },
+                { letter: "B", text: "友善和睦，互帮互助关系好" },
+                { letter: "C", text: "关系别扭，相处尴尬不自在" },
+                { letter: "D", text: "平淡相处，互不打扰" },
+                { letter: "E", text: "说话大声，容易打扰邻里" },
+                { letter: "F", text: "矛盾不断，相处极差" },
+                { letter: "G", text: "协调邻里关系，制定相处规则" }
+            ]
+        },
+        {
+            question: "你的抗压恢复速度？",
+            options: [
+                { letter: "A", text: "快速恢复，上限极高格局大" },
+                { letter: "B", text: "平稳恢复，状态回归快" },
+                { letter: "C", text: "恢复缓慢，心态混乱难调整" },
+                { letter: "D", text: "慢慢恢复，佛系看待压力" },
+                { letter: "E", text: "恢复急躁，情绪波动大吵闹" },
+                { letter: "F", text: "无法恢复，直接摆烂崩溃" },
+                { letter: "G", text: "快速调整全局，恢复整体节奏" }
+            ]
+        },
+        {
+            question: "你对潮流、热点的关注度？",
+            options: [
+                { letter: "A", text: "精准把握，有高级审美格局" },
+                { letter: "B", text: "适度关注，紧跟主流不盲从" },
+                { letter: "C", text: "滞后老旧，不懂潮流热点" },
+                { letter: "D", text: "偶尔关注，不跟风不刻意" },
+                { letter: "E", text: "盲目跟风，表达急躁吵闹" },
+                { letter: "F", text: "漠不关心，还嘲讽热点" },
+                { letter: "G", text: "判断潮流价值，决定是否推广" }
+            ]
+        },
+        {
+            question: "你承担责任、担当的表现？",
+            options: [
+                { letter: "A", text: "勇于担当，实力匹配责任" },
+                { letter: "B", text: "主动担责，靠谱不推卸" },
+                { letter: "C", text: "担责混乱，处理不好责任事" },
+                { letter: "D", text: "承担分内责任，不多揽事" },
+                { letter: "E", text: "担责急躁，做事毛躁动静大" },
+                { letter: "F", text: "拒绝担责，遇事甩锅他人" },
+                { letter: "G", text: "分配责任，制定担当规则" }
+            ]
+        },
+        {
+            question: "你独处时的状态与感受？",
+            options: [
+                { letter: "A", text: "享受独处，提升自我有格局" },
+                { letter: "B", text: "平和独处，放松舒适状态好" },
+                { letter: "C", text: "独处焦虑，胡思乱想内耗" },
+                { letter: "D", text: "平淡独处，无聊打发时间" },
+                { letter: "E", text: "独处急躁，坐不住动静大" },
+                { letter: "F", text: "独处摆烂，消极颓废" },
+                { letter: "G", text: "独处规划全局，思考规则优化" }
+            ]
+        },
+        {
+            question: "你对环保、公益的态度？",
+            options: [
+                { letter: "A", text: "主动践行，格局大爱环保" },
+                { letter: "B", text: "积极参与，认真做好公益" },
+                { letter: "C", text: "敷衍应付，行动混乱不到位" },
+                { letter: "D", text: "随手参与，不刻意不拒绝" },
+                { letter: "E", text: "热心参与，过程急躁吵闹" },
+                { letter: "F", text: "无视环保，破坏公益" },
+                { letter: "G", text: "规划公益活动，制定环保规则" }
+            ]
+        },
+        {
+            question: "你模仿、学习他人优点的能力？",
+            options: [
+                { letter: "A", text: "快速吸收，化为己用有天赋" },
+                { letter: "B", text: "认真学习，稳步提升自己" },
+                { letter: "C", text: "模仿僵硬，学不到核心精髓" },
+                { letter: "D", text: "简单模仿，不求精进" },
+                { letter: "E", text: "模仿急躁，粗心学不到位" },
+                { letter: "F", text: "拒绝学习，嫉妒他人优点" },
+                { letter: "G", text: "提炼优点体系，推广给他人" }
+            ]
+        },
+        {
+            question: "你应对节日、仪式感的态度？",
+            options: [
+                { letter: "A", text: "精致仪式感，格调高级浪漫" },
+                { letter: "B", text: "用心对待，仪式感踏实温暖" },
+                { letter: "C", text: "敷衍了事，仪式感混乱奇怪" },
+                { letter: "D", text: "平淡对待，有无仪式感都行" },
+                { letter: "E", text: "热情直接，仪式感急躁吵闹" },
+                { letter: "F", text: "无视节日，毫无仪式感" },
+                { letter: "G", text: "规划节日流程，营造整体氛围" }
+            ]
+        },
+        {
+            question: "你的逻辑思维、分析能力？",
+            options: [
+                { letter: "A", text: "逻辑天花板，分析精准透彻" },
+                { letter: "B", text: "逻辑清晰，分析理性靠谱" },
+                { letter: "C", text: "逻辑混乱，分析片面别扭" },
+                { letter: "D", text: "逻辑简单，只看表面现象" },
+                { letter: "E", text: "逻辑急躁，分析片面大声" },
+                { letter: "F", text: "毫无逻辑，主观臆断甩锅" },
+                { letter: "G", text: "统筹逻辑框架，把控分析方向" }
+            ]
+        },
+        {
+            question: "你对运动健身、体能的态度？",
+            options: [
+                { letter: "A", text: "天赋出众，体能状态极佳" },
+                { letter: "B", text: "坚持健身，体能稳定良好" },
+                { letter: "C", text: "健身混乱，三天打鱼两天晒网" },
+                { letter: "D", text: "偶尔运动，体能一般" },
+                { letter: "E", text: "健身急躁，动作幅度大噪音大" },
+                { letter: "F", text: "拒绝运动，体能极差摆烂" },
+                { letter: "G", text: "制定健身计划，提升整体体能" }
+            ]
+        },
+        {
+            question: "你处理网络社交、线上关系的方式？",
+            options: [
+                { letter: "A", text: "理性得体，线上线下一致" },
+                { letter: "B", text: "真诚友善，线上相处舒服" },
+                { letter: "C", text: "言行尴尬，线上交流别扭" },
+                { letter: "D", text: "平淡交流，不活跃不疏离" },
+                { letter: "E", text: "发言急躁，打字大声刷屏" },
+                { letter: "F", text: "网络摆烂，发表负面言论" },
+                { letter: "G", text: "规范网络言行，维护交流秩序" }
+            ]
+        },
+        {
+            question: "你对旧物、纪念品的态度？",
+            options: [
+                { letter: "A", text: "珍藏纪念，格调情怀满满" },
+                { letter: "B", text: "妥善保存，珍惜旧物回忆" },
+                { letter: "C", text: "随意堆放，旧物杂乱无章" },
+                { letter: "D", text: "留存基础，不刻意珍藏" },
+                { letter: "E", text: "收拾急躁，旧物乱扔动静大" },
+                { letter: "F", text: "丢弃旧物，毫无留念之心" },
+                { letter: "G", text: "筛选旧物价值，规划留存规则" }
+            ]
+        },
+        {
+            question: "你应对加班、额外任务的态度？",
+            options: [
+                { letter: "A", text: "高效完成，格局不计较得失" },
+                { letter: "B", text: "认真完成，踏实承担额外事" },
+                { letter: "C", text: "抵触混乱，敷衍完成质量差" },
+                { letter: "D", text: "勉强完成，只求过关" },
+                { letter: "E", text: "急躁抱怨，做事毛躁动静大" },
+                { letter: "F", text: "拒绝加班，甩锅摆烂" },
+                { letter: "G", text: "分配额外任务，平衡工作量" }
+            ]
+        },
+        {
+            question: "你的幽默感、搞笑能力？",
+            options: [
+                { letter: "A", text: "高级幽默，有格局让人舒服" },
+                { letter: "B", text: "温和幽默，调节气氛接地气" },
+                { letter: "C", text: "尴尬玩笑，让人别扭不舒服" },
+                { letter: "D", text: "平淡无趣，无太多幽默感" },
+                { letter: "E", text: "直白搞笑，声音大吵闹" },
+                { letter: "F", text: "低级玩笑，冒犯他人不礼貌" },
+                { letter: "G", text: "把控幽默尺度，维护氛围和谐" }
+            ]
+        },
+        {
+            question: "你对未来生活的期待值？",
+            options: [
+                { letter: "A", text: "期待极高，无奈现实有阻碍" },
+                { letter: "B", text: "期待适中，稳步实现小目标" },
+                { letter: "C", text: "期待混乱，迷茫无方向" },
+                { letter: "D", text: "期待平淡，安稳度日就好" },
+                { letter: "E", text: "期待急躁，急于求成" },
+                { letter: "F", text: "毫无期待，彻底摆烂" },
+                { letter: "G", text: "规划未来生活，掌控发展走向" }
+            ]
+        },
+        {
+            question: "你处理物品损坏、故障的方式？",
+            options: [
+                { letter: "A", text: "精准修复，天赋动手能力强" },
+                { letter: "B", text: "稳妥修复，解决故障问题" },
+                { letter: "C", text: "越修越坏，操作混乱损坏" },
+                { letter: "D", text: "凑合使用，不刻意修复" },
+                { letter: "E", text: "急躁敲打，动作大力噪音大" },
+                { letter: "F", text: "丢弃物品，甩锅质量太差" },
+                { letter: "G", text: "规划维修方案，制定修复规则" }
+            ]
+        },
+        {
+            question: "你对他人成就的认可度？",
+            options: [
+                { letter: "A", text: "客观认可，欣赏真正实力" },
+                { letter: "B", text: "真诚认可，肯定他人付出" },
+                { letter: "C", text: "别扭认可，内心不服气" },
+                { letter: "D", text: "随意认可，不深究不评价" },
+                { letter: "E", text: "大声认可，语气急躁强势" },
+                { letter: "F", text: "否定诋毁，不愿认可他人" },
+                { letter: "G", text: "理性评判成就，制定认可标准" }
+            ]
+        },
+        {
+            question: "你日常走路、行动的姿态？",
+            options: [
+                { letter: "A", text: "优雅从容，步伐沉稳有格局" },
+                { letter: "B", text: "稳重端正，步伐踏实得体" },
+                { letter: "C", text: "慌乱笨拙，走路姿态奇怪" },
+                { letter: "D", text: "随意普通，步伐平淡无奇" },
+                { letter: "E", text: "大步流星，行动急躁动静大" },
+                { letter: "F", text: "懒散拖沓，走路无精打采" },
+                { letter: "G", text: "把控行动节奏，规范举止姿态" }
+            ]
+        },
+        {
+            question: "你面对考试、考核的表现？",
+            options: [
+                { letter: "A", text: "实力顶尖，受外部环境影响" },
+                { letter: "B", text: "发挥稳定，顺利通过考核" },
+                { letter: "C", text: "发挥失常，心态混乱紧张" },
+                { letter: "D", text: "及格就行，不求高分" },
+                { letter: "E", text: "急躁答题，粗心出错多" },
+                { letter: "F", text: "放弃考核，摆烂交白卷" },
+                { letter: "G", text: "制定考核标准，评判能力水平" }
+            ]
+        },
+        {
+            question: "你对艺术、审美相关的感知力？",
+            options: [
+                { letter: "A", text: "审美顶级，艺术感知力极强" },
+                { letter: "B", text: "审美正常，能分辨美丑好坏" },
+                { letter: "C", text: "审美老旧，艺术感知混乱" },
+                { letter: "D", text: "审美普通，无太多追求" },
+                { letter: "E", text: "审美直白，表达急躁吵闹" },
+                { letter: "F", text: "毫无审美，破坏美感" },
+                { letter: "G", text: "筛选艺术价值，制定审美标准" }
+            ]
+        },
+        {
+            question: "你应对他人请求、要求的方式？",
+            options: [
+                { letter: "A", text: "得体拒绝，格局清晰有边界" },
+                { letter: "B", text: "合理答应，靠谱完成请求" },
+                { letter: "C", text: "盲目答应，处理不好添麻烦" },
+                { letter: "D", text: "随意答应，敷衍完成" },
+                { letter: "E", text: "急躁答应，过程吵闹毛躁" },
+                { letter: "F", text: "直接拒绝，甩锅嫌麻烦" },
+                { letter: "G", text: "评估请求价值，制定回应规则" }
+            ]
+        },
+        {
+            question: "你的坚持力、毅力水平？",
+            options: [
+                { letter: "A", text: "毅力顶级，长久坚持有天赋" },
+                { letter: "B", text: "毅力稳定，持之以恒不放弃" },
+                { letter: "C", text: "毅力薄弱，半途而废混乱" },
+                { letter: "D", text: "有基础毅力，坚持简单事" },
+                { letter: "E", text: "毅力急躁，三分钟热度" },
+                { letter: "F", text: "毫无毅力，彻底摆烂放弃" },
+                { letter: "G", text: "规划坚持周期，提升整体毅力" }
+            ]
+        },
+        {
+            question: "你对生活品质、细节的追求？",
+            options: [
+                { letter: "A", text: "极致品质，细节精致有格局" },
+                { letter: "B", text: "注重品质，细节稳妥舒适" },
+                { letter: "C", text: "无视品质，生活细节混乱" },
+                { letter: "D", text: "随意生活，品质细节无所谓" },
+                { letter: "E", text: "追求表面，细节急躁粗糙" },
+                { letter: "F", text: "摆烂生活，毫无品质可言" },
+                { letter: "G", text: "制定生活标准，提升整体品质" }
+            ]
+        },
+        {
+            question: "最后一题，重新定义你自己：",
+            options: [
+                { letter: "A", text: "天纵奇才，生不逢时终被铭记" },
+                { letter: "B", text: "中流砥柱，平凡可靠一生安稳" },
+                { letter: "C", text: "勤恳老实，先天缺憾难改本性" },
+                { letter: "D", text: "朴实实干，接地气过好小日子" },
+                { letter: "E", text: "本分老实，急躁吵闹本性难移" },
+                { letter: "F", text: "底子薄弱，逃避摆烂不负责任" },
+                { letter: "G", text: "执掌全局，定规则掌命运走向" }
             ]
         }
     ];
@@ -606,12 +1501,20 @@
         F: "T4 垫底型：早期老仿考"
     };
     
+    // 测试配置
+    const TEST_QUESTIONS_COUNT = 25; // 每次测试抽取的题目数量
+    
+    // 状态变量
+    let questions = [];
     let currentQuestionIndex = 0;
     let answers = {};
-    const totalQuestions = questions.length;
+    let shuffledOptions = {}; // 记录每道题打乱后的选项顺序
     
     function init() {
-        document.getElementById('totalQuestions').textContent = totalQuestions;
+        // 每次测试都打乱题目顺序，随机抽取 TEST_QUESTIONS_COUNT 道题
+        questions = shuffleArray(allQuestions).slice(0, TEST_QUESTIONS_COUNT);
+        
+        document.getElementById('totalQuestions').textContent = questions.length;
         loadQuestion();
     }
     
@@ -619,27 +1522,31 @@
         const question = questions[currentQuestionIndex];
         
         document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
-        document.getElementById('progressFill').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+        document.getElementById('progressFill').style.width = ((currentQuestionIndex + 1) / questions.length * 100) + '%';
         document.getElementById('questionNumber').textContent = '第 ' + (currentQuestionIndex + 1) + ' 题';
         document.getElementById('questionText').textContent = question.question;
         
         const optionsContainer = document.getElementById('optionsContainer');
         optionsContainer.innerHTML = '';
         
-        question.options.forEach(function(option) {
+        // 如果这道题还没打乱过选项，先打乱
+        if (!shuffledOptions[currentQuestionIndex]) {
+            // 复制选项并打乱顺序
+            shuffledOptions[currentQuestionIndex] = shuffleArray([...question.options]);
+        }
+        
+        const currentOptions = shuffledOptions[currentQuestionIndex];
+        
+        currentOptions.forEach(function(option) {
             const optionDiv = document.createElement('div');
             optionDiv.className = 'option' + (answers[currentQuestionIndex] === option.letter ? ' selected' : '');
             optionDiv.onclick = function() { selectOption(option.letter); };
-            
-            const letterDiv = document.createElement('div');
-            letterDiv.className = 'option-letter';
-            letterDiv.textContent = option.letter;
+            optionDiv.dataset.letter = option.letter; // 添加data-letter属性
             
             const textDiv = document.createElement('div');
             textDiv.className = 'option-text';
             textDiv.textContent = option.text;
             
-            optionDiv.appendChild(letterDiv);
             optionDiv.appendChild(textDiv);
             optionsContainer.appendChild(optionDiv);
         });
@@ -652,7 +1559,7 @@
         
         document.querySelectorAll('.option').forEach(function(opt) {
             opt.classList.remove('selected');
-            if (opt.querySelector('.option-letter').textContent === letter) {
+            if (opt.dataset.letter === letter) {
                 opt.classList.add('selected');
             }
         });
@@ -666,7 +1573,7 @@
         
         prevBtn.disabled = currentQuestionIndex === 0;
         
-        if (currentQuestionIndex === totalQuestions - 1) {
+        if (currentQuestionIndex === questions.length - 1) {
             nextBtn.textContent = '查看结果';
             nextBtn.disabled = !answers[currentQuestionIndex];
         } else {
@@ -676,7 +1583,7 @@
     }
     
     function nextQuestion() {
-        if (currentQuestionIndex === totalQuestions - 1) {
+        if (currentQuestionIndex === questions.length - 1) {
             showResult();
         } else {
             currentQuestionIndex++;
@@ -750,15 +1657,17 @@
     }
     
     function restartTest() {
+        // 重置状态，重新打乱
         currentQuestionIndex = 0;
         answers = {};
+        shuffledOptions = {};
         
         document.getElementById('resultContainer').classList.remove('show');
         document.getElementById('questionContainer').style.display = 'block';
         document.querySelector('.nav-buttons').style.display = 'flex';
         document.querySelector('.mbti-header .progress-text').style.display = 'block';
         
-        loadQuestion();
+        init(); // 重新初始化，再次打乱题目和选项
     }
     
     window.onload = function() {
