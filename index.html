@@ -619,7 +619,7 @@
                                 </div>
                             </div>
                             
-                            <button type="submit" id="line-image-submit-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                            <button type="submit" id="line-image-submit-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                                 提交图片
                             </button>
                         </div>
@@ -708,7 +708,7 @@
                                 </div>
                             </div>
                             
-                            <button type="submit" id="vehicle-model-submit-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                            <button type="submit" id="vehicle-model-submit-btn" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                                 提交车型
                             </button>
                         </div>
@@ -1301,8 +1301,18 @@
                 tab.classList.remove('tab-active');
                 tab.classList.add('text-gray-500');
             });
-            event.target.classList.add('tab-active');
-            event.target.classList.remove('text-gray-500');
+            // 尝试使用 event.target，如果不可用则通过查询选择器
+            if (event && event.target) {
+                event.target.classList.add('tab-active');
+                event.target.classList.remove('text-gray-500');
+            } else {
+                // 通过 onclick 属性查找对应的按钮
+                const navBtn = document.querySelector(`.nav-tab[onclick*="showPage('${pageName}')"]`);
+                if (navBtn) {
+                    navBtn.classList.add('tab-active');
+                    navBtn.classList.remove('text-gray-500');
+                }
+            }
             
             // 如果是上传页面，初始化地图
             if (pageName === 'upload') {
@@ -2080,20 +2090,24 @@
         });
 
         function checkVehicleModelSubmitEnabled() {
-            const modelName = document.querySelector('#vehicle-model-upload-form input[name="modelName"]').value;
-            const brand = document.querySelector('#vehicle-model-upload-form input[name="brand"]').value;
+            const modelName = document.querySelector('#vehicle-model-upload-form input[name="modelName"]');
+            const brand = document.querySelector('#vehicle-model-upload-form input[name="brand"]');
             const btn = document.getElementById('vehicle-model-submit-btn');
             
-            btn.disabled = !(modelName && brand);
+            if (modelName && brand && btn) {
+                btn.disabled = !(modelName.value && brand.value);
+            }
         }
 
         // 检查线路图片提交按钮是否可用
         function checkLineImageSubmitEnabled() {
-            const lineId = document.getElementById('line-select').value;
-            const imageData = document.getElementById('line-only-image').dataset.base64;
+            const lineId = document.getElementById('line-select');
+            const imageData = document.getElementById('line-only-image');
             const btn = document.getElementById('line-image-submit-btn');
             
-            btn.disabled = !(lineId && imageData);
+            if (lineId && imageData && btn) {
+                btn.disabled = !(lineId.value && imageData.dataset.base64);
+            }
         }
 
         // 切换上传类型
@@ -2109,11 +2123,27 @@
                 document.getElementById('upload-tab-line-image').classList.add('bg-primary', 'text-white');
                 // 加载线路下拉列表
                 loadLineSelect();
+                // 绑定线路选择事件
+                const lineSelect = document.getElementById('line-select');
+                if (lineSelect) {
+                    lineSelect.addEventListener('change', checkLineImageSubmitEnabled);
+                }
             } else if (tabName === 'vehicle-model') {
                 document.getElementById('upload-tab-vehicle-model').classList.remove('bg-gray-200', 'text-gray-700');
                 document.getElementById('upload-tab-vehicle-model').classList.add('bg-primary', 'text-white');
                 // 加载车型上传的线路下拉列表
                 loadVehicleModelLineSelect();
+                // 绑定车型输入事件
+                const modelNameInput = document.querySelector('#vehicle-model-upload-form input[name="modelName"]');
+                const brandInput = document.querySelector('#vehicle-model-upload-form input[name="brand"]');
+                if (modelNameInput) {
+                    modelNameInput.addEventListener('input', checkVehicleModelSubmitEnabled);
+                }
+                if (brandInput) {
+                    brandInput.addEventListener('input', checkVehicleModelSubmitEnabled);
+                }
+                // 初始化按钮状态
+                checkVehicleModelSubmitEnabled();
             }
             
             // 切换内容区域
