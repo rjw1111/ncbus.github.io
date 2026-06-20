@@ -935,6 +935,9 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 自动配置云端同步Token
+            autoSetupCloudSync();
+            
             // 初始化本地存储数据
             initLocalData();
             
@@ -963,7 +966,76 @@
             
             // 更新云端同步状态
             updateSyncStatus();
+            
+            // 启动定期自动同步（每5分钟）
+            setInterval(autoSyncData, 5 * 60 * 1000);
         });
+
+        // 自动配置云端同步
+        function autoSetupCloudSync() {
+            // 检查是否已配置Token
+            const token = localStorage.getItem('github_token');
+            const gistId = localStorage.getItem('bus_gist_id');
+            
+            if (!token) {
+                // 使用默认Token（用户之前提供的）
+                const defaultToken = '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';
+                localStorage.setItem('github_token', defaultToken);
+                console.log('✅ 自动配置云端同步Token');
+            }
+            
+            // 自动从云端拉取数据
+            setTimeout(() => {
+                autoPullFromCloud();
+            }, 1000);
+        }
+
+        // 自动从云端拉取数据
+        async function autoPullFromCloud() {
+            try {
+                console.log('🔄 正在自动从云端拉取数据...');
+                const cloudData = await getAllData();
+                
+                if (cloudData && cloudData.lastUpdate) {
+                    // 检查云端数据是否比本地新
+                    const localSyncTime = localStorage.getItem('last_sync_time') || '1970-01-01';
+                    const cloudSyncTime = cloudData.lastUpdate;
+                    
+                    if (new Date(cloudSyncTime) > new Date(localSyncTime)) {
+                        // 更新本地存储
+                        localStorage.setItem('bus_lines', JSON.stringify(cloudData.lines || []));
+                        localStorage.setItem('bus_vehicles', JSON.stringify(cloudData.vehicles || []));
+                        localStorage.setItem('bus_vehicle_models', JSON.stringify(cloudData.vehicleModels || []));
+                        localStorage.setItem('line_images', JSON.stringify(cloudData.lineImages || []));
+                        localStorage.setItem('bus_trips', JSON.stringify(cloudData.trips || []));
+                        localStorage.setItem('last_sync_time', cloudSyncTime);
+                        
+                        // 刷新页面数据
+                        loadLinesList();
+                        loadVehiclesList();
+                        loadLatestData();
+                        updateStats();
+                        
+                        console.log('✅ 自动拉取完成，数据已更新');
+                    } else {
+                        console.log('✅ 本地数据已是最新');
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ 自动拉取失败:', error.message);
+            }
+        }
+
+        // 自动同步数据到云端
+        async function autoSyncData() {
+            try {
+                console.log('🔄 正在自动同步数据到云端...');
+                await syncAllToCloud();
+                console.log('✅ 自动同步完成');
+            } catch (error) {
+                console.log('⚠️ 自动同步失败:', error.message);
+            }
+        }
 
         // 更新云端同步状态显示
         function updateSyncStatus() {
@@ -2545,8 +2617,8 @@
                 vehicleModels.push(modelData);
                 localStorage.setItem('bus_vehicle_models', JSON.stringify(vehicleModels));
                 
-                // 上传到云端
-                uploadToCloud('vehicleModels', modelData);
+                // 自动同步到云端
+                autoSyncData();
                 
                 showToast('车型信息提交成功' + (isAdmin ? '' : '，等待审核'));
                 
@@ -3246,7 +3318,7 @@
         }
 
         // 审核通过线路图片
-        function approveLineImage(id) {
+        async function approveLineImage(id) {
             const lineImages = JSON.parse(localStorage.getItem('line_images') || '[]');
             const index = lineImages.findIndex(img => img.id === id);
             if (index !== -1) {
@@ -3256,11 +3328,14 @@
                 loadAdminLineImagesList();
                 updateStats();
                 loadLinesList();
+                
+                // 自动同步到云端
+                await autoSyncData();
             }
         }
 
         // 拒绝线路图片
-        function rejectLineImage(id) {
+        async function rejectLineImage(id) {
             const lineImages = JSON.parse(localStorage.getItem('line_images') || '[]');
             const filtered = lineImages.filter(img => img.id !== id);
             localStorage.setItem('line_images', JSON.stringify(filtered));
@@ -3268,10 +3343,13 @@
             loadAdminLineImagesList();
             updateStats();
             loadLinesList();
+            
+            // 自动同步到云端
+            await autoSyncData();
         }
 
         // 审核通过线路
-        function approveLine(id) {
+        async function approveLine(id) {
             const lines = JSON.parse(localStorage.getItem('bus_lines'));
             const index = lines.findIndex(l => l.id === id);
             if (index !== -1) {
@@ -3282,11 +3360,14 @@
                 updateStats();
                 loadLatestData();
                 loadLinesList();
+                
+                // 自动同步到云端
+                await autoSyncData();
             }
         }
 
         // 拒绝线路
-        function rejectLine(id) {
+        async function rejectLine(id) {
             const lines = JSON.parse(localStorage.getItem('bus_lines'));
             const filtered = lines.filter(l => l.id !== id);
             localStorage.setItem('bus_lines', JSON.stringify(filtered));
@@ -3295,10 +3376,13 @@
             updateStats();
             loadLatestData();
             loadLinesList();
+            
+            // 自动同步到云端
+            await autoSyncData();
         }
 
         // 审核通过车辆
-        function approveVehicle(id) {
+        async function approveVehicle(id) {
             const vehicles = JSON.parse(localStorage.getItem('bus_vehicles'));
             const index = vehicles.findIndex(v => v.id === id);
             if (index !== -1) {
@@ -3309,11 +3393,14 @@
                 updateStats();
                 loadLatestData();
                 loadVehiclesList();
+                
+                // 自动同步到云端
+                await autoSyncData();
             }
         }
 
         // 拒绝车辆
-        function rejectVehicle(id) {
+        async function rejectVehicle(id) {
             const vehicles = JSON.parse(localStorage.getItem('bus_vehicles'));
             const filtered = vehicles.filter(v => v.id !== id);
             localStorage.setItem('bus_vehicles', JSON.stringify(filtered));
@@ -3322,10 +3409,13 @@
             updateStats();
             loadLatestData();
             loadVehiclesList();
+            
+            // 自动同步到云端
+            await autoSyncData();
         }
 
         // 审核通过车型
-        function approveVehicleModel(id) {
+        async function approveVehicleModel(id) {
             const vehicleModels = JSON.parse(localStorage.getItem('bus_vehicle_models') || '[]');
             const index = vehicleModels.findIndex(m => m.id === id);
             if (index !== -1) {
@@ -3334,17 +3424,23 @@
                 showToast('审核通过');
                 loadAdminVehicleModelsList();
                 updateStats();
+                
+                // 自动同步到云端
+                await autoSyncData();
             }
         }
 
         // 拒绝车型
-        function rejectVehicleModel(id) {
+        async function rejectVehicleModel(id) {
             const vehicleModels = JSON.parse(localStorage.getItem('bus_vehicle_models') || '[]');
             const filtered = vehicleModels.filter(m => m.id !== id);
             localStorage.setItem('bus_vehicle_models', JSON.stringify(filtered));
             showToast('已拒绝');
             loadAdminVehicleModelsList();
             updateStats();
+            
+            // 自动同步到云端
+            await autoSyncData();
         }
 
         // 提示消息
