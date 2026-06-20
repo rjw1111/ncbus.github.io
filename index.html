@@ -190,8 +190,8 @@
                 </div>
             </div>
 
-            <!-- 云端同步功能 -->
-            <div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+            <!-- 云端同步状态（用户不可见配置） -->
+            <div class="bg-white rounded-xl p-6 shadow-sm mb-8 hidden">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center">
                         <div class="p-3 bg-blue-100 rounded-lg">
@@ -202,20 +202,6 @@
                             <p class="text-sm text-gray-500">同步状态：<span id="sync-status" class="text-gray-600">检查中...</span></p>
                             <p class="text-xs text-gray-400 mt-1">上次同步：<span id="last-sync-time">从未同步</span></p>
                         </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <button onclick="showGitHubTokenModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm flex items-center gap-2">
-                            <i class="fa fa-key"></i>
-                            配置 Token
-                        </button>
-                        <button onclick="syncAllToCloud()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-2" id="home-sync-btn">
-                            <i class="fa fa-cloud-upload"></i>
-                            同步到云端
-                        </button>
-                        <button onclick="pullFromCloud()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm flex items-center gap-2" id="home-pull-btn">
-                            <i class="fa fa-cloud-download"></i>
-                            从云端拉取
-                        </button>
                     </div>
                 </div>
             </div>
@@ -735,12 +721,7 @@
         <div id="page-admin" class="page hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-neutral">管理中心</h2>
-                <div class="flex gap-4">
-                    <button onclick="syncAllToCloud()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-2" id="sync-btn">
-                        <i class="fa fa-cloud-upload"></i>同步到云端
-                    </button>
-                    <span class="text-sm text-gray-500">当前角色：<span class="font-medium text-primary">管理员</span></span>
-                </div>
+                <span class="text-sm text-gray-500">当前角色：<span class="font-medium text-primary">管理员</span></span>
             </div>
 
             <!-- 审核统计 -->
@@ -971,23 +952,14 @@
             setInterval(autoSyncData, 5 * 60 * 1000);
         });
 
-        // 自动配置云端同步
+        // 自动配置云端同步（Token已硬编码，用户无需操作）
         function autoSetupCloudSync() {
-            // 检查是否已配置Token
-            const token = localStorage.getItem('github_token');
-            const gistId = localStorage.getItem('bus_gist_id');
+            console.log('✅ 云端同步已自动配置');
             
-            if (!token) {
-                // 使用默认Token（用户之前提供的）
-                const defaultToken = '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';
-                localStorage.setItem('github_token', defaultToken);
-                console.log('✅ 自动配置云端同步Token');
-            }
-            
-            // 自动从云端拉取数据
+            // 自动从云端拉取数据（延迟2秒确保页面初始化完成）
             setTimeout(() => {
-                autoPullFromCloud();
-            }, 1000);
+                autoPullFromCloud().catch(err => console.log('首次使用，将自动创建云端存储'));
+            }, 2000);
         }
 
         // 自动从云端拉取数据
@@ -1039,29 +1011,29 @@
 
         // 更新云端同步状态显示
         function updateSyncStatus() {
-            const token = localStorage.getItem('github_token') || '';
-            const gistId = localStorage.getItem('bus_gist_id') || '';
+            const gistId = localStorage.getItem(GIST_ID_KEY) || '';
             const lastSyncTime = localStorage.getItem('last_sync_time') || '';
             
             const syncStatusEl = document.getElementById('sync-status');
             const lastSyncTimeEl = document.getElementById('last-sync-time');
             
-            if (token && gistId) {
-                syncStatusEl.textContent = '已连接';
-                syncStatusEl.className = 'text-green-600 font-medium';
-            } else if (token) {
-                syncStatusEl.textContent = '已配置Token';
-                syncStatusEl.className = 'text-yellow-600 font-medium';
-            } else {
-                syncStatusEl.textContent = '未连接';
-                syncStatusEl.className = 'text-gray-600';
+            if (syncStatusEl) {
+                if (gistId) {
+                    syncStatusEl.textContent = '云端已连接';
+                    syncStatusEl.className = 'text-green-600 font-medium';
+                } else {
+                    syncStatusEl.textContent = '首次使用，将自动创建云端存储';
+                    syncStatusEl.className = 'text-yellow-600 font-medium';
+                }
             }
             
-            if (lastSyncTime) {
-                const date = new Date(lastSyncTime);
-                lastSyncTimeEl.textContent = date.toLocaleString('zh-CN');
-            } else {
-                lastSyncTimeEl.textContent = '从未同步';
+            if (lastSyncTimeEl) {
+                if (lastSyncTime) {
+                    const date = new Date(lastSyncTime);
+                    lastSyncTimeEl.textContent = date.toLocaleString('zh-CN');
+                } else {
+                    lastSyncTimeEl.textContent = '从未同步';
+                }
             }
         }
 
@@ -1916,75 +1888,112 @@
         }
 
         // 检查车型提交按钮是否可用
-        // 数据同步配置
-        // 模式选择：'local' = 本地服务器, 'gist' = GitHub Gist（推荐，无需服务器）
-        const SYNC_MODE = 'gist';
-        const LOCAL_SERVER_URL = 'http://localhost:3000'; // 本地服务器地址（仅在 local 模式下使用）
-        
-        // GitHub Gist 配置（推荐方案）
+        // ==================== 云端同步配置 ====================
+        // GitHub Gist 配置（Token 已硬编码，用户无需配置）
+        const GITHUB_TOKEN = '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';
         const GITHUB_GIST_API = 'https://api.github.com/gists';
         const GIST_ID_KEY = 'bus_gist_id';
         
-        // 获取 GitHub Personal Access Token（从 localStorage 读取）
-        function getGitHubToken() {
-            return localStorage.getItem('github_token') || '';
-        }
-
-        // 通用 API 请求
-        async function apiRequest(endpoint, method = 'GET', data = null) {
+        // 获取云端数据
+        async function getCloudData() {
             try {
-                const options = {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
-                
-                if (data) {
-                    options.body = JSON.stringify(data);
+                const gistId = localStorage.getItem(GIST_ID_KEY);
+                if (!gistId) {
+                    console.log('⚠️ 未找到 Gist ID，首次使用');
+                    return null;
                 }
                 
-                console.log(`[API请求] ${method} ${LOCAL_SERVER_URL}${endpoint}`);
-                const response = await fetch(`${LOCAL_SERVER_URL}${endpoint}`, options);
+                const response = await fetch(`${GITHUB_GIST_API}/${gistId}`, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`API 请求失败: ${response.status} - ${errorText}`);
+                    console.error('获取云端数据失败:', response.status);
+                    return null;
                 }
                 
-                return await response.json();
+                const gist = await response.json();
+                const content = gist.files['bus_data.json'].content;
+                const data = JSON.parse(content);
+                console.log('✅ 成功获取云端数据');
+                return data;
             } catch (error) {
-                console.error('[API请求错误]', error);
-                throw error;
+                console.error('获取云端数据异常:', error);
+                return null;
             }
         }
-
-        // 上传数据到云端
-        async function uploadToCloud(endpoint, data) {
+        
+        // 保存数据到云端
+        async function saveCloudData(data) {
             try {
-                if (SYNC_MODE === 'local') {
-                    // 使用本地服务器
-                    await apiRequest('/api/add', 'POST', { type: endpoint, data });
-                    console.log('本地服务器上传成功');
-                    return true;
+                let gistId = localStorage.getItem(GIST_ID_KEY);
+                const content = JSON.stringify(data, null, 2);
+                
+                if (gistId) {
+                    // 更新现有 Gist
+                    const response = await fetch(`${GITHUB_GIST_API}/${gistId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            description: '公交档案站数据同步',
+                            files: { 'bus_data.json': { content } }
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        console.error('更新云端数据失败:', response.status);
+                        return false;
+                    }
                 } else {
-                    // 使用 GitHub Gist
-                    return await uploadToGitHubGist(endpoint, data);
+                    // 创建新 Gist
+                    const response = await fetch(GITHUB_GIST_API, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            description: '公交档案站数据同步',
+                            public: false,
+                            files: { 'bus_data.json': { content } }
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        console.error('创建云端数据失败:', response.status);
+                        return false;
+                    }
+                    
+                    const result = await response.json();
+                    localStorage.setItem(GIST_ID_KEY, result.id);
+                    console.log('✅ 已创建新的云端存储');
                 }
+                
+                console.log('✅ 成功保存数据到云端');
+                return true;
             } catch (error) {
-                console.warn('云端上传失败:', error.message);
+                console.error('保存云端数据异常:', error);
                 return false;
             }
         }
 
-        // 获取所有数据
+        // 获取所有数据（从云端）
         async function getAllData() {
-            if (SYNC_MODE === 'local') {
-                try {
-                    return await apiRequest('/api/data');
-                } catch (error) {
-                    console.warn('获取云端数据失败:', error.message);
+            try {
+                const cloudData = await getCloudData();
+                if (cloudData) {
+                    return cloudData;
                 }
+            } catch (error) {
+                console.warn('获取云端数据失败:', error.message);
             }
             
             // 返回本地数据作为备份
@@ -1994,14 +2003,12 @@
                 vehicleModels: JSON.parse(localStorage.getItem('bus_vehicle_models') || '[]'),
                 lineImages: JSON.parse(localStorage.getItem('line_images') || '[]'),
                 trips: JSON.parse(localStorage.getItem('bus_trips') || '[]'),
-                lastSyncTime: new Date().toISOString()
+                lastUpdate: localStorage.getItem('last_sync_time') || new Date().toISOString()
             };
         }
 
         // 批量同步所有数据到云端
         async function syncAllToCloud() {
-            showToast('正在同步到云端...');
-            
             try {
                 const data = {
                     lines: JSON.parse(localStorage.getItem('bus_lines') || '[]'),
@@ -2009,7 +2016,7 @@
                     vehicleModels: JSON.parse(localStorage.getItem('bus_vehicle_models') || '[]'),
                     lineImages: JSON.parse(localStorage.getItem('line_images') || '[]'),
                     trips: JSON.parse(localStorage.getItem('bus_trips') || '[]'),
-                    lastSyncTime: new Date().toISOString()
+                    lastUpdate: new Date().toISOString()
                 };
                 
                 console.log('[同步数据]', {
@@ -2020,288 +2027,57 @@
                     trips: data.trips.length
                 });
                 
-                if (SYNC_MODE === 'local') {
-                    // 同步到本地服务器
-                    const result = await apiRequest('/api/sync', 'POST', data);
-                    console.log('[同步结果]', result);
-                    
-                    if (result.success) {
-                        showToast('同步成功！');
-                        localStorage.setItem('last_sync_time', new Date().toISOString());
-                        updateSyncStatus();
-                        
-                        // 更新本地数据
-                        if (result.data) {
-                            localStorage.setItem('bus_lines', JSON.stringify(result.data.lines || []));
-                            localStorage.setItem('bus_vehicles', JSON.stringify(result.data.vehicles || []));
-                            localStorage.setItem('bus_vehicle_models', JSON.stringify(result.data.vehicleModels || []));
-                            localStorage.setItem('line_images', JSON.stringify(result.data.lineImages || []));
-                            localStorage.setItem('bus_trips', JSON.stringify(result.data.trips || []));
-                            
-                            // 刷新页面数据
-                            loadLinesList();
-                            loadVehiclesList();
-                            loadLatestData();
-                            updateStats();
-                        }
-                        return true;
-                    } else {
-                        throw new Error('服务器返回同步失败');
-                    }
+                const success = await saveCloudData(data);
+                
+                if (success) {
+                    localStorage.setItem('last_sync_time', data.lastUpdate);
+                    updateSyncStatus();
+                    return true;
                 } else {
-                    // 同步到 GitHub Gist
-                    return await syncToGitHubGist(data);
+                    throw new Error('云端保存失败');
                 }
             } catch (error) {
                 console.error('[同步异常]', error);
-                showToast('同步失败: ' + error.message);
-                alert('同步失败！\n\n可能原因：\n1. 服务器未启动\n2. 服务器地址配置错误\n3. 网络连接问题\n\n请查看浏览器控制台（F12）获取详细信息。');
                 return false;
             }
         }
 
         // 从云端拉取数据
         async function pullFromCloud() {
-            showToast('正在从云端拉取数据...');
-            
             try {
-                const cloudData = await getAllData();
+                const cloudData = await getCloudData();
                 
-                // 更新本地存储
-                localStorage.setItem('bus_lines', JSON.stringify(cloudData.lines || []));
-                localStorage.setItem('bus_vehicles', JSON.stringify(cloudData.vehicles || []));
-                localStorage.setItem('bus_vehicle_models', JSON.stringify(cloudData.vehicleModels || []));
-                localStorage.setItem('line_images', JSON.stringify(cloudData.lineImages || []));
-                localStorage.setItem('bus_trips', JSON.stringify(cloudData.trips || []));
-                localStorage.setItem('last_sync_time', cloudData.lastUpdate || new Date().toISOString());
-                
-                // 刷新页面数据
-                loadLinesList();
-                loadVehiclesList();
-                loadLatestData();
-                updateStats();
-                updateSyncStatus();
-                
-                showToast('拉取成功！');
-                return true;
+                if (cloudData) {
+                    // 更新本地存储
+                    localStorage.setItem('bus_lines', JSON.stringify(cloudData.lines || []));
+                    localStorage.setItem('bus_vehicles', JSON.stringify(cloudData.vehicles || []));
+                    localStorage.setItem('bus_vehicle_models', JSON.stringify(cloudData.vehicleModels || []));
+                    localStorage.setItem('line_images', JSON.stringify(cloudData.lineImages || []));
+                    localStorage.setItem('bus_trips', JSON.stringify(cloudData.trips || []));
+                    localStorage.setItem('last_sync_time', cloudData.lastUpdate || new Date().toISOString());
+                    
+                    // 刷新页面数据
+                    loadLinesList();
+                    loadVehiclesList();
+                    loadLatestData();
+                    updateStats();
+                    updateSyncStatus();
+                    
+                    return true;
+                } else {
+                    throw new Error('云端数据为空');
+                }
             } catch (error) {
-                showToast('拉取失败: ' + error.message);
                 console.error('拉取异常:', error);
                 return false;
             }
         }
 
-        // GitHub Gist 上传函数（备用）
-        async function uploadToGitHubGist(endpoint, data) {
-            const token = getGitHubToken();
-            if (!token) {
-                console.warn('未配置 GitHub Token，跳过云端上传');
-                return false;
-            }
-            
-            try {
-                let gistId = localStorage.getItem(GIST_ID_KEY);
-                const currentData = await getAllData();
-                currentData[endpoint] = currentData[endpoint] || [];
-                currentData[endpoint].push(data);
-                currentData.lastSyncTime = new Date().toISOString();
-                const content = JSON.stringify(currentData, null, 2);
-                
-                if (gistId) {
-                    const response = await fetch(`${GITHUB_GIST_API}/${gistId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            description: '公交档案站数据同步',
-                            files: { 'bus_data.json': { content } }
-                        })
-                    });
-                    if (!response.ok) return false;
-                } else {
-                    const response = await fetch(GITHUB_GIST_API, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            description: '公交档案站数据同步',
-                            public: false,
-                            files: { 'bus_data.json': { content } }
-                        })
-                    });
-                    if (!response.ok) return false;
-                    const gist = await response.json();
-                    localStorage.setItem(GIST_ID_KEY, gist.id);
-                }
-                return true;
-            } catch (error) {
-                console.warn('GitHub 上传异常:', error.message);
-                return false;
-            }
-        }
-
-        // GitHub Gist 同步函数（备用）
-        async function syncToGitHubGist(data) {
-            const token = getGitHubToken();
-            if (!token) {
-                showToast('请先配置 GitHub Token');
-                showGitHubTokenModal();
-                return false;
-            }
-            
-            try {
-                let gistId = localStorage.getItem(GIST_ID_KEY);
-                
-                if (gistId) {
-                    const response = await fetch(`${GITHUB_GIST_API}/${gistId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            description: '公交档案站数据同步',
-                            files: { 'bus_data.json': { content: JSON.stringify(data, null, 2) } }
-                        })
-                    });
-                    if (!response.ok) throw new Error('同步失败');
-                } else {
-                    const response = await fetch(GITHUB_GIST_API, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            description: '公交档案站数据同步',
-                            public: false,
-                            files: { 'bus_data.json': { content: JSON.stringify(data, null, 2) } }
-                        })
-                    });
-                    if (!response.ok) throw new Error('同步失败');
-                    const gist = await response.json();
-                    localStorage.setItem(GIST_ID_KEY, gist.id);
-                }
-                
-                showToast('同步成功！');
-                localStorage.setItem('last_sync_time', new Date().toISOString());
-                updateSyncStatus();
-                return true;
-            } catch (error) {
-                showToast('同步失败: ' + error.message);
-                return false;
-            }
-        }
-
         // 更新云端同步状态显示
-        function updateSyncStatus() {
-            const lastSyncTime = localStorage.getItem('last_sync_time') || '';
-            const syncStatusEl = document.getElementById('sync-status');
-            const lastSyncTimeEl = document.getElementById('last-sync-time');
-            
-            if (SYNC_MODE === 'gist') {
-                const token = localStorage.getItem('github_token') || '';
-                const gistId = localStorage.getItem(GIST_ID_KEY) || '';
-                if (token && gistId) {
-                    syncStatusEl.textContent = 'GitHub Gist 已连接';
-                    syncStatusEl.className = 'text-green-600 font-medium';
-                } else if (token) {
-                    syncStatusEl.textContent = '请先同步一次';
-                    syncStatusEl.className = 'text-yellow-600 font-medium';
-                } else {
-                    syncStatusEl.textContent = '请配置 GitHub Token';
-                    syncStatusEl.className = 'text-red-600 font-medium';
-                }
-            } else {
-                syncStatusEl.textContent = '本地服务器';
-                syncStatusEl.className = 'text-blue-600 font-medium';
-            }
-            
-            if (lastSyncTime) {
-                const date = new Date(lastSyncTime);
-                lastSyncTimeEl.textContent = date.toLocaleString('zh-CN');
-            } else {
-                lastSyncTimeEl.textContent = '从未同步';
-            }
-        }
-
-        // 显示云端配置提示
-        function showCloudConfigTip() {
-            if (SYNC_MODE === 'gist') {
-                showGitHubTokenModal();
-            } else {
-                showToast('请确保本地服务器已启动');
-            }
-        }
-
         // 页面加载时更新状态
         window.addEventListener('load', () => {
             updateSyncStatus();
         });
-
-        // 显示 GitHub Token 配置弹窗
-        function showGitHubTokenModal() {
-            const modal = `
-                <div id="github-token-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div class="bg-white rounded-xl p-6 w-full max-w-md">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold">配置 GitHub Token</h3>
-                            <button onclick="hideGitHubTokenModal()" class="text-gray-400 hover:text-gray-600">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                        <p class="text-sm text-gray-500 mb-4">
-                            请输入您的 GitHub Personal Access Token（需要 gist 权限）
-                        </p>
-                        <input type="password" id="github-token-input" 
-                               placeholder="github_pat_xxxxxxxxxxxx"
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 mb-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <p class="text-xs text-blue-700">
-                                <strong>如何获取 Token：</strong><br>
-                                1. 登录 GitHub<br>
-                                2. 进入 Settings → Developer settings → Personal access tokens<br>
-                                3. 生成新 Token，勾选 <strong>gist</strong> 权限
-                            </p>
-                        </div>
-                        <div class="flex gap-4">
-                            <button onclick="saveGitHubToken()" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-                                保存
-                            </button>
-                            <button onclick="hideGitHubTokenModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                                取消
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modal);
-        }
-
-        // 隐藏 GitHub Token 配置弹窗
-        function hideGitHubTokenModal() {
-            document.getElementById('github-token-modal')?.remove();
-        }
-
-        // 保存 GitHub Token
-        function saveGitHubToken() {
-            const token = document.getElementById('github-token-input').value.trim();
-            if (token) {
-                localStorage.setItem('github_token', token);
-                showToast('Token 已保存');
-                hideGitHubTokenModal();
-            } else {
-                showToast('请输入 Token');
-            }
-        }
 
         function checkVehicleModelSubmitEnabled() {
             const modelName = document.querySelector('#vehicle-model-upload-form input[name="modelName"]').value;
@@ -2425,8 +2201,8 @@
                 lines.push(lineData);
                 localStorage.setItem('bus_lines', JSON.stringify(lines));
                 
-                // 上传到云端
-                uploadToCloud('lines', lineData);
+                // 自动同步到云端
+                autoSyncData();
                 
                 showToast('线路信息提交成功');
                 hideLineForm();
@@ -2465,8 +2241,8 @@
                 vehicles.push(vehicleData);
                 localStorage.setItem('bus_vehicles', JSON.stringify(vehicles));
                 
-                // 上传到云端
-                uploadToCloud('vehicles', vehicleData);
+                // 自动同步到云端
+                autoSyncData();
                 
                 showToast('车辆信息提交成功');
                 hideVehicleForm();
@@ -2510,8 +2286,8 @@
                 lineImages.push(imageData);
                 localStorage.setItem('line_images', JSON.stringify(lineImages));
                 
-                // 上传到云端
-                uploadToCloud('lineImages', imageData);
+                // 自动同步到云端
+                autoSyncData();
                 
                 showToast('图片上传成功' + (isAdmin ? '' : '，等待审核'));
                 
@@ -2564,8 +2340,8 @@
                 trips.push(tripData);
                 localStorage.setItem('bus_trips', JSON.stringify(trips));
                 
-                // 上传到云端
-                uploadToCloud('trips', tripData);
+                // 自动同步到云端
+                autoSyncData();
                 
                 // 自动匹配车辆到线路
                 autoMatchVehicleToLine(plateNumber, lineId);
@@ -4098,4 +3874,4 @@
     </script>
 
 
-</body></html
+</body></html>
